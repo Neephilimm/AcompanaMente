@@ -71,7 +71,7 @@ const userInput = document.getElementById('user-input');
 const chatBox = document.getElementById('chat-box');
 
 // PEGA AQUÍ LA URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
-const APPS_SCRIPT_URL = 'URL_DE_TU_WEB_APP_AQUI';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbhgyb-eoQanSFXUcFbP-ouI_eNbArwOTvn7Bg0KwO-IyAfAm9pNr_vvxUml3476jhOQ/exec';
 
 btnEnviar.addEventListener('click', async () => {
     const texto = userInput.value.trim();
