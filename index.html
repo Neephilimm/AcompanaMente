@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apoyo y Salud Mental Cercana</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Red de Apoyo de Salud Mental</h1>
+        <p>Encuentra centros de atención cercanos y resuelve tus dudas.</p>
+    </header>
+
+    <main class="container">
+        <section class="map-section">
+            <h2>Centros Cercanos</h2>
+            <button id="btn-ubicar" class="primary-btn">Buscar cerca de mi ubicación</button>
+            <div id="map"></div>
+        </section>
+
+        <section class="ai-section">
+            <h2>Asistente de Orientación</h2>
+            <div id="chat-box" class="chat-box">
+                <p class="ai-msg">Hola, estoy aquí para escucharte y orientarte. ¿En qué te puedo ayudar hoy?</p>
+            </div>
+            <div class="input-area">
+                <input type="text" id="user-input" placeholder="Escribe tu consulta aquí...">
+                <button id="btn-enviar">Enviar</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
