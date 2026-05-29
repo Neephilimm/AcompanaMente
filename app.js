@@ -88,7 +88,7 @@ const userInput = document.getElementById('user-input');
 const chatBox = document.getElementById('chat-box');
 
 // ¡IMPORTANTE! Reemplaza esto con la URL de tu nueva implementación de Google Apps Script
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwisQSc2tkKcNhgNV1NRt7_s-nYE-2xbVhc8hD1euHRmHPQiMLwNbQKST2PmlRRtN_wuA/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzw-Ojl3VhtKLOsZwJUE7WWT-xzNPU5b5WDtQskBgEzg1y1vw2H8ez5b6gOpCxlowow/exec';
 
 btnEnviar.addEventListener('click', async () => {
     const texto = userInput.value.trim();
