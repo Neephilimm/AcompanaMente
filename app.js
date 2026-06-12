@@ -1,7 +1,6 @@
 // ==========================================
 // CONFIGURACIÓN GLOBAL 
 // ==========================================
-// REEMPLAZA CON TU URL EXACTA DE APPS SCRIPT AL HACER LA NUEVA VERSIÓN
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzw-Ojl3VhtKLOsZwJUE7WWT-xzNPU5b5WDtQskBgEzg1y1vw2H8ez5b6gOpCxlowow/exec';
 
 let currentLat = null;
@@ -111,7 +110,7 @@ btnEnviar.addEventListener('click', async () => {
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
-        // Se envía el prompt y, si existe, la ubicación del usuario
+        // Se envía el prompt y la ubicación del usuario
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
             body: JSON.stringify({ 
@@ -129,36 +128,50 @@ btnEnviar.addEventListener('click', async () => {
         } else if (data.respuesta) {
             let textoIA = data.respuesta;
             
-            // Lógica para detectar e inyectar el gráfico de Chart.js
-            const chartMatch = textoIA.match(/\[DATOS:(.*?)\]/);
-            if (chartMatch) {
-                const rawData = chartMatch[1]; 
-                textoIA = textoIA.replace(chartMatch[0], '').trim();
+            // NUEVA LÓGICA: Más inteligente y tolerante a errores de formato de la IA
+            if (textoIA.includes("DATOS:")) {
+                // Separamos el mensaje amigable de los datos matemáticos
+                const partes = textoIA.split("DATOS:");
+                textoIA = partes[0].trim(); // Nos quedamos solo con el texto para el usuario
                 
+                // Limpiamos los datos: quitamos corchetes (si los puso) y espacios extra
+                const rawData = partes[1].replace(/\[|\]/g, '').trim(); 
+                
+                // Creamos el espacio para el gráfico
                 const canvasId = 'chart-' + Date.now();
                 chatBox.innerHTML += `<div class="ai-msg">${textoIA}<br><br><canvas id="${canvasId}" style="max-width: 100%;"></canvas></div>`;
                 
                 const etiquetas = [];
                 const valores = [];
+                
+                // Procesamos las emociones
                 rawData.split(',').forEach(item => {
-                    const partes = item.split('-');
-                    etiquetas.push(partes[0]);
-                    valores.push(parseInt(partes[1]));
+                    const datosItem = item.split('-');
+                    if(datosItem.length === 2) { // Verificamos que tenga el formato Palabra-Numero
+                        etiquetas.push(datosItem[0].trim());
+                        valores.push(parseInt(datosItem[1].trim()));
+                    }
                 });
                 
-                // Dibujar gráfico
+                // Dibujamos el gráfico
                 new Chart(document.getElementById(canvasId), {
                     type: 'bar', 
                     data: {
                         labels: etiquetas,
                         datasets: [{
-                            label: 'Nivel (1-10)',
+                            label: 'Nivel Emocional',
                             data: valores,
-                            backgroundColor: ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f']
+                            backgroundColor: ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6']
                         }]
+                    },
+                    options: {
+                        scales: {
+                            y: { beginAtZero: true, max: 10 } // Forzamos a que el gráfico sea del 0 al 10
+                        }
                     }
                 });
             } else {
+                // Si el mensaje no trae datos de gráfico, se imprime normal
                 chatBox.innerHTML += `<div class="ai-msg">${textoIA}</div>`;
             }
         }
