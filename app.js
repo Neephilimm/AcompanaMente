@@ -13,16 +13,13 @@ let userMarker = null;
 function formatearPesoChileno(valor) {
     if (!valor || valor === "") return 'No especificado';
     
-    // Limpiamos el valor por si ya venía con un signo $ o puntos desde el Excel
     let valorLimpio = String(valor).trim().replace('$', '').replace(/\./g, ''); 
     let numero = parseInt(valorLimpio);
 
-    // Si el valor no es un número (ej: "Gratis"), lo mostramos tal cual
     if (isNaN(numero)) {
         return valor; 
     }
 
-    // Formateamos el número puro a moneda chilena (CLP)
     return new Intl.NumberFormat('es-CL', { 
         style: 'currency', 
         currency: 'CLP',
@@ -87,24 +84,32 @@ async function buscarCentrosSalud() {
         }
 
         data.forEach(centro => {
-            const latitud = parseFloat(centro.Latitud);
-            const longitud = parseFloat(centro.Longitud);
+            // Mapeo tolerante a variaciones de mayúsculas y acentos en las columnas de la hoja
+            const keys = Object.keys(centro);
+            const latKey = keys.find(k => k.toLowerCase() === 'latitud') || 'Latitud';
+            const lngKey = keys.find(k => k.toLowerCase() === 'longitud') || 'Longitud';
+            const nombreKey = keys.find(k => k.toLowerCase() === 'nombre') || 'Nombre';
+            const valorIndKey = keys.find(k => k.toLowerCase() === 'valor_individual') || 'Valor_Individual';
+            const ubicacionKey = keys.find(k => k.toLowerCase().includes('ubicac')) || 'Ubicacion';
+            const contactoKey = keys.find(k => k.toLowerCase() === 'contacto') || 'Contacto';
+
+            const latitud = parseFloat(centro[latKey]);
+            const longitud = parseFloat(centro[lngKey]);
             
             if (!isNaN(latitud) && !isNaN(longitud)) {
-                // Pasamos el valor individual por la función de formato
-                const valorIndividualF = formatearPesoChileno(centro.Valor_Individual);
+                const valorIndividualF = formatearPesoChileno(centro[valorIndKey]);
 
                 L.marker([latitud, longitud]).addTo(map)
                  .bindPopup(`
                     <div style="font-family: 'Segoe UI', Arial, sans-serif; min-width: 230px; max-width: 290px;">
-                        <b style="color: #2c3e50; font-size: 1.15em; display: block; margin-bottom: 5px;">${centro.Nombre || 'Centro de Salud'}</b>
+                        <b style="color: #2c3e50; font-size: 1.15em; display: block; margin-bottom: 5px;">${centro[nombreKey] || 'Centro de Salud'}</b>
                         <hr style="border: 0; border-top: 1px solid #eee; margin: 6px 0;">
                         
                         <p style="margin: 4px 0;"><b>🧠 Cita Individual:</b> <span style="color: #2c3e50; font-weight: bold;">${valorIndividualF}</span></p>
                         
                         <hr style="border: 0; border-top: 1px solid #eee; margin: 6px 0;">
-                        <p style="margin: 4px 0; font-size: 0.95em;"><b>📍 Ubicación:</b> ${centro.Ubicacion || 'No especificada'}</p>
-                        <p style="margin: 4px 0; font-size: 0.95em;"><b>📞 Contacto:</b> ${centro.Contacto || 'No disponible'}</p>
+                        <p style="margin: 4px 0; font-size: 0.95em;"><b>📍 Ubicación:</b> ${centro[ubicacionKey] || 'No especificada'}</p>
+                        <p style="margin: 4px 0; font-size: 0.95em;"><b>📞 Contacto:</b> ${centro[contactoKey] || 'No disponible'}</p>
                     </div>
                  `);
             }
