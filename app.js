@@ -1,35 +1,34 @@
-// ==========================================
 // CONFIGURACIÓN GLOBAL 
-// ==========================================
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzw-Ojl3VhtKLOsZwJUE7WWT-xzNPU5b5WDtQskBgEzg1y1vw2H8ez5b6gOpCxlowow/exec';
 
 let currentLat = null;
 let currentLng = null;
 let userMarker = null;
 
-// ==========================================
 // FUNCIÓN INFALIBLE PARA FORMATEAR A PESOS CHILENOS (CLP)
-// ==========================================
 function formatearPesoChileno(valor) {
     if (valor === undefined || valor === null || valor === "") return 'No especificado';
     
-    // Filtro estricto: removemos absolutamente todo lo que no sea un número directo
     let soloNumeros = String(valor).replace(/\D/g, ''); 
 
-    // Si el texto original no contenía números (ej: "Gratis"), lo muestra tal cual
     if (soloNumeros === "") {
         return valor; 
     }
 
     let numero = parseInt(soloNumeros, 10);
-
-    // Inyección forzada de puntos para separación de miles y símbolo $
     return '$' + numero.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
-// ==========================================
+// FUNCIÓN PARA LIMPIAR TELÉFONOS DE FORMATOS DE EXCEL
+function formatearTelefonoExcel(valor) {
+    if (valor === undefined || valor === null || valor === "") return 'No disponible';
+    let texto = String(valor).trim();
+    texto = texto.replace(/\.0+$/, ''); // Remueve el punto decimal (.0 o .00)
+    texto = texto.replace(/,/g, '');    // Remueve las comas de miles que pone Excel
+    return texto;
+}
+
 // 1. CONFIGURACIÓN DEL MAPA
-// ==========================================
 let map = L.map('map').setView([-33.4263, -70.6123], 13); 
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -50,7 +49,6 @@ btnUbicar.addEventListener('click', () => {
                 
                 if(userMarker) map.removeLayer(userMarker);
                 
-                // Círculo azul interactivo para el usuario
                 userMarker = L.circleMarker([currentLat, currentLng], {
                     radius: 9,
                     fillColor: "#0078ff",
@@ -85,12 +83,13 @@ async function buscarCentrosSalud() {
         }
 
         data.forEach(centro => {
-            // Lectura tolerante de las columnas del Google Sheet
             const keys = Object.keys(centro);
             const nombreKey = keys.find(k => k.toLowerCase().replace(/[\s_]/g, '') === 'nombre') || 'Nombre';
             const valorIndKey = keys.find(k => k.toLowerCase().replace(/[\s_]/g, '') === 'valorindividual') || 'Valor_Individual';
-            const ubicacionKey = keys.find(k => k.toLowerCase().includes('ubicac')) || 'Ubicacion';
             const contactoKey = keys.find(k => k.toLowerCase().replace(/[\s_]/g, '') === 'contacto') || 'Contacto';
+            const calificacionKey = keys.find(k => k.toLowerCase().includes('calific')) || 'Calificación';
+            const resenasKey = keys.find(k => k.toLowerCase().includes('reseñ') || k.toLowerCase().includes('resen')) || 'Cantidad de Reseñas';
+            const ubicacionKey = keys.find(k => k.toLowerCase().includes('ubicac')) || 'Ubicacion';
             const latKey = keys.find(k => k.toLowerCase().replace(/[\s_]/g, '') === 'latitud') || 'Latitud';
             const lngKey = keys.find(k => k.toLowerCase().replace(/[\s_]/g, '') === 'longitud') || 'Longitud';
 
@@ -98,8 +97,27 @@ async function buscarCentrosSalud() {
             const longitud = parseFloat(centro[lngKey]);
             
             if (!isNaN(latitud) && !isNaN(longitud)) {
-                // Formateamos el valor numérico
                 const valorIndividualF = formatearPesoChileno(centro[valorIndKey]);
+                const telefonoF = formatearTelefonoExcel(centro[contactoKey]);
+                
+                let rawCalif = centro[calificacionKey];
+                let calificacionF = "Sin registrar";
+                if (rawCalif !== undefined && rawCalif !== null && String(rawCalif).trim() !== "") {
+                    let numLimpio = String(rawCalif).replace('$', '').trim();
+                    let valorNumerico = parseFloat(numLimpio);
+                    if (!isNaN(valorNumerico)) {
+                        calificacionF = `⭐ ${valorNumerico.toFixed(1)} / 5.0`;
+                    } else {
+                        calificacionF = numLimpio; // Muestra "Sin calificación" de forma limpia
+                    }
+                }
+
+                let rawResenas = centro[resenasKey];
+                let resenasF = "0";
+                if (rawResenas !== undefined && rawResenas !== null && String(rawResenas).trim() !== "") {
+                    let resLimpio = String(rawResenas).replace(/\.0+$/, '').replace(/,/g, '').trim();
+                    if(resLimpio !== "") resenasF = resLimpio;
+                }
 
                 L.marker([latitud, longitud]).addTo(map)
                  .bindPopup(`
@@ -108,10 +126,12 @@ async function buscarCentrosSalud() {
                         <hr style="border: 0; border-top: 1px solid #eee; margin: 6px 0;">
                         
                         <p style="margin: 4px 0;"><b>🧠 Valor Cita:</b> <span style="color: #2c3e50; font-weight: bold;">${valorIndividualF}</span></p>
+                        <p style="margin: 4px 0;"><b>📊 Calificación:</b> <span style="color: #2c3e50; font-weight: bold;">${calificacionF}</span></p>
+                        <p style="margin: 2px 0 4px 0; font-size: 0.9em; color: #666; padding-left: 2px;">💬 ${resenasF} reseñas totales</p>
                         
                         <hr style="border: 0; border-top: 1px solid #eee; margin: 6px 0;">
                         <p style="margin: 4px 0; font-size: 0.95em;"><b>📍 Ubicación:</b> ${centro[ubicacionKey] || 'No específica'}</p>
-                        <p style="margin: 4px 0; font-size: 0.95em;"><b>📞 Contacto:</b> ${centro[contactoKey] || 'No disponible'}</p>
+                        <p style="margin: 4px 0; font-size: 0.95em;"><b>📞 Contacto:</b> ${telefonoF}</p>
                     </div>
                  `);
             }
@@ -121,9 +141,7 @@ async function buscarCentrosSalud() {
     }
 }
 
-// ==========================================
 // 2. CONFIGURACIÓN DEL CHAT DE IA (GROQ + GRÁFICOS)
-// ==========================================
 const btnEnviar = document.getElementById('btn-enviar');
 const userInput = document.getElementById('user-input');
 const chatBox = document.getElementById('chat-box');
