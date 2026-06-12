@@ -1,12 +1,17 @@
 // ==========================================
-// CONFIGURACIÓN GLOBAL (Enlace de Apps Script)
+// CONFIGURACIÓN GLOBAL 
 // ==========================================
+// REEMPLAZA CON TU URL EXACTA DE APPS SCRIPT AL HACER LA NUEVA VERSIÓN
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzw-Ojl3VhtKLOsZwJUE7WWT-xzNPU5b5WDtQskBgEzg1y1vw2H8ez5b6gOpCxlowow/exec';
 
+let currentLat = null;
+let currentLng = null;
+let userMarker = null;
+
 // ==========================================
-// 1. CONFIGURACIÓN DEL MAPA Y GOOGLE SHEETS
+// 1. CONFIGURACIÓN DEL MAPA
 // ==========================================
-let map = L.map('map').setView([-33.4263, -70.6123], 13); // Centrado inicial en Santiago (Providencia)
+let map = L.map('map').setView([-33.4263, -70.6123], 13); 
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
@@ -19,19 +24,29 @@ btnUbicar.addEventListener('click', () => {
         btnUbicar.innerText = "Buscando...";
         navigator.geolocation.getCurrentPosition(
             (position) => {
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
+                currentLat = position.coords.latitude;
+                currentLng = position.coords.longitude;
                 
-                // Mover el mapa a la posición real del usuario
-                map.setView([lat, lng], 14);
-                L.marker([lat, lng]).addTo(map).bindPopup("Tu ubicación actual").openPopup();
+                map.setView([currentLat, currentLng], 14);
                 
-                // Cargar los centros desde tu Google Sheet
+                // Borrar marcador anterior si existe
+                if(userMarker) map.removeLayer(userMarker);
+                
+                // Círculo azul interactivo para el usuario
+                userMarker = L.circleMarker([currentLat, currentLng], {
+                    radius: 9,
+                    fillColor: "#0078ff",
+                    color: "#ffffff",
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map).bindPopup("<b>Estás aquí</b>").openPopup();
+                
                 buscarCentrosSalud();
                 btnUbicar.innerText = "Ubicación encontrada";
             },
             () => {
-                alert("No pudimos acceder a tu ubicación. Mostrando todos los centros registrados de todos modos.");
+                alert("Mostrando centros sin tu ubicación exacta.");
                 buscarCentrosSalud();
                 btnUbicar.innerText = "Buscar cerca de mi ubicación";
             }
@@ -43,7 +58,6 @@ btnUbicar.addEventListener('click', () => {
 
 async function buscarCentrosSalud() {
     try {
-        // Ejecuta automáticamente la función doGet() en tu Apps Script para traer las filas de Sheets
         const response = await fetch(APPS_SCRIPT_URL);
         const data = await response.json();
 
@@ -56,7 +70,6 @@ async function buscarCentrosSalud() {
             const latitud = parseFloat(centro.Latitud);
             const longitud = parseFloat(centro.Longitud);
             
-            // Si las coordenadas son válidas, dibuja el pin con la información comercial estructurada
             if (!isNaN(latitud) && !isNaN(longitud)) {
                 L.marker([latitud, longitud]).addTo(map)
                  .bindPopup(`
@@ -79,7 +92,7 @@ async function buscarCentrosSalud() {
 }
 
 // ==========================================
-// 2. CONFIGURACIÓN DEL CHAT DE IA (GROQ)
+// 2. CONFIGURACIÓN DEL CHAT DE IA (GROQ + GRÁFICOS)
 // ==========================================
 const btnEnviar = document.getElementById('btn-enviar');
 const userInput = document.getElementById('user-input');
@@ -89,21 +102,23 @@ btnEnviar.addEventListener('click', async () => {
     const texto = userInput.value.trim();
     if (!texto) return;
 
-    // Pintar mensaje del usuario
     chatBox.innerHTML += `<div class="user-msg">${texto}</div>`;
     userInput.value = '';
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    // Estado "Escribiendo..."
     const loadingId = 'loading-' + Date.now();
     chatBox.innerHTML += `<div id="${loadingId}" class="ai-msg">Escribiendo...</div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
-        // Envía un método POST que ejecuta la función doPost() en tu Apps Script (Conecta a Groq de forma segura)
+        // Se envía el prompt y, si existe, la ubicación del usuario
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            body: JSON.stringify({ prompt: texto })
+            body: JSON.stringify({ 
+                prompt: texto,
+                userLat: currentLat,
+                userLng: currentLng
+            })
         });
         
         const data = await response.json();
@@ -112,17 +127,48 @@ btnEnviar.addEventListener('click', async () => {
         if (data.error) {
             chatBox.innerHTML += `<div class="ai-msg" style="color: red;"><b>Error:</b> ${data.error}</div>`;
         } else if (data.respuesta) {
-            chatBox.innerHTML += `<div class="ai-msg">${data.respuesta}</div>`;
+            let textoIA = data.respuesta;
+            
+            // Lógica para detectar e inyectar el gráfico de Chart.js
+            const chartMatch = textoIA.match(/\[DATOS:(.*?)\]/);
+            if (chartMatch) {
+                const rawData = chartMatch[1]; 
+                textoIA = textoIA.replace(chartMatch[0], '').trim();
+                
+                const canvasId = 'chart-' + Date.now();
+                chatBox.innerHTML += `<div class="ai-msg">${textoIA}<br><br><canvas id="${canvasId}" style="max-width: 100%;"></canvas></div>`;
+                
+                const etiquetas = [];
+                const valores = [];
+                rawData.split(',').forEach(item => {
+                    const partes = item.split('-');
+                    etiquetas.push(partes[0]);
+                    valores.push(parseInt(partes[1]));
+                });
+                
+                // Dibujar gráfico
+                new Chart(document.getElementById(canvasId), {
+                    type: 'bar', 
+                    data: {
+                        labels: etiquetas,
+                        datasets: [{
+                            label: 'Nivel (1-10)',
+                            data: valores,
+                            backgroundColor: ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f']
+                        }]
+                    }
+                });
+            } else {
+                chatBox.innerHTML += `<div class="ai-msg">${textoIA}</div>`;
+            }
         }
-        
     } catch (error) {
         document.getElementById(loadingId).remove();
-        chatBox.innerHTML += `<div class="ai-msg" style="color: red;">Error de conexión con el asistente virtual.</div>`;
+        chatBox.innerHTML += `<div class="ai-msg" style="color: red;">Error de conexión.</div>`;
     }
     chatBox.scrollTop = chatBox.scrollHeight;
 });
 
-// Permitir el envío cómodo con la tecla Enter
 userInput.addEventListener('keypress', function (e) {
     if (e.key === 'Enter') btnEnviar.click();
 });
