@@ -8,23 +8,23 @@ let currentLng = null;
 let userMarker = null;
 
 // ==========================================
-// FUNCIÓN PARA FORMATEAR A PESOS CHILENOS (CLP)
+// FUNCIÓN INFALIBLE PARA FORMATEAR A PESOS CHILENOS (CLP)
 // ==========================================
 function formatearPesoChileno(valor) {
-    if (!valor || valor === "") return 'No especificado';
+    if (valor === undefined || valor === null || valor === "") return 'No especificado';
     
-    let valorLimpio = String(valor).trim().replace('$', '').replace(/\./g, ''); 
-    let numero = parseInt(valorLimpio);
+    // Filtro estricto: removemos absolutamente todo lo que no sea un número directo
+    let soloNumeros = String(valor).replace(/\D/g, ''); 
 
-    if (isNaN(numero)) {
+    // Si el texto original no contenía números (ej: "Gratis"), lo muestra tal cual
+    if (soloNumeros === "") {
         return valor; 
     }
 
-    return new Intl.NumberFormat('es-CL', { 
-        style: 'currency', 
-        currency: 'CLP',
-        maximumFractionDigits: 0
-    }).format(numero);
+    let numero = parseInt(soloNumeros, 10);
+
+    // Inyección forzada de puntos para separación de miles y símbolo $
+    return '$' + numero.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
 // ==========================================
@@ -50,6 +50,7 @@ btnUbicar.addEventListener('click', () => {
                 
                 if(userMarker) map.removeLayer(userMarker);
                 
+                // Círculo azul interactivo para el usuario
                 userMarker = L.circleMarker([currentLat, currentLng], {
                     radius: 9,
                     fillColor: "#0078ff",
@@ -84,19 +85,20 @@ async function buscarCentrosSalud() {
         }
 
         data.forEach(centro => {
-            // Mapeo tolerante a variaciones de mayúsculas y acentos en las columnas de la hoja
+            // Lectura tolerante de las columnas del Google Sheet
             const keys = Object.keys(centro);
-            const latKey = keys.find(k => k.toLowerCase() === 'latitud') || 'Latitud';
-            const lngKey = keys.find(k => k.toLowerCase() === 'longitud') || 'Longitud';
-            const nombreKey = keys.find(k => k.toLowerCase() === 'nombre') || 'Nombre';
-            const valorIndKey = keys.find(k => k.toLowerCase() === 'valor_individual') || 'Valor_Individual';
+            const nombreKey = keys.find(k => k.toLowerCase().replace(/[\s_]/g, '') === 'nombre') || 'Nombre';
+            const valorIndKey = keys.find(k => k.toLowerCase().replace(/[\s_]/g, '') === 'valorindividual') || 'Valor_Individual';
             const ubicacionKey = keys.find(k => k.toLowerCase().includes('ubicac')) || 'Ubicacion';
-            const contactoKey = keys.find(k => k.toLowerCase() === 'contacto') || 'Contacto';
+            const contactoKey = keys.find(k => k.toLowerCase().replace(/[\s_]/g, '') === 'contacto') || 'Contacto';
+            const latKey = keys.find(k => k.toLowerCase().replace(/[\s_]/g, '') === 'latitud') || 'Latitud';
+            const lngKey = keys.find(k => k.toLowerCase().replace(/[\s_]/g, '') === 'longitud') || 'Longitud';
 
             const latitud = parseFloat(centro[latKey]);
             const longitud = parseFloat(centro[lngKey]);
             
             if (!isNaN(latitud) && !isNaN(longitud)) {
+                // Formateamos el valor numérico
                 const valorIndividualF = formatearPesoChileno(centro[valorIndKey]);
 
                 L.marker([latitud, longitud]).addTo(map)
@@ -105,10 +107,10 @@ async function buscarCentrosSalud() {
                         <b style="color: #2c3e50; font-size: 1.15em; display: block; margin-bottom: 5px;">${centro[nombreKey] || 'Centro de Salud'}</b>
                         <hr style="border: 0; border-top: 1px solid #eee; margin: 6px 0;">
                         
-                        <p style="margin: 4px 0;"><b>🧠 Cita Individual:</b> <span style="color: #2c3e50; font-weight: bold;">${valorIndividualF}</span></p>
+                        <p style="margin: 4px 0;"><b>🧠 Valor Cita:</b> <span style="color: #2c3e50; font-weight: bold;">${valorIndividualF}</span></p>
                         
                         <hr style="border: 0; border-top: 1px solid #eee; margin: 6px 0;">
-                        <p style="margin: 4px 0; font-size: 0.95em;"><b>📍 Ubicación:</b> ${centro[ubicacionKey] || 'No especificada'}</p>
+                        <p style="margin: 4px 0; font-size: 0.95em;"><b>📍 Ubicación:</b> ${centro[ubicacionKey] || 'No específica'}</p>
                         <p style="margin: 4px 0; font-size: 0.95em;"><b>📞 Contacto:</b> ${centro[contactoKey] || 'No disponible'}</p>
                     </div>
                  `);
