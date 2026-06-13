@@ -1,25 +1,17 @@
-// ==========================================
-// CONTROL DEL MENÚ DE PESTAÑAS (TABS)
-// ==========================================
 function abrirPestana(evt, idPestana) {
-    // 1. Ocultar todos los contenidos de las pestañas
     const contenidos = document.getElementsByClassName("tab-content");
     for (let i = 0; i < contenidos.length; i++) {
         contenidos[i].classList.remove("active");
     }
 
-    // 2. Quitar la clase "active" de todos los botones
     const botones = document.getElementsByClassName("tab-btn");
     for (let i = 0; i < botones.length; i++) {
         botones[i].classList.remove("active");
     }
 
-    // 3. Mostrar la pestaña actual y activar su botón
     document.getElementById(idPestana).classList.add("active");
     evt.currentTarget.classList.add("active");
 
-    // 4. TRUCO DE LEAFLET: Redibujar el mapa si se abre su pestaña
-    // Los mapas suelen "romperse" si se cargan estando ocultos (display:none)
     if (idPestana === 'tab-mapa' && map) {
         setTimeout(() => {
             map.invalidateSize();
@@ -27,18 +19,12 @@ function abrirPestana(evt, idPestana) {
     }
 }
 
-// ==========================================
-// CONFIGURACIÓN GLOBAL 
-// ==========================================
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzw-Ojl3VhtKLOsZwJUE7WWT-xzNPU5b5WDtQskBgEzg1y1vw2H8ez5b6gOpCxlowow/exec';
 
 let currentLat = null;
 let currentLng = null;
 let userMarker = null;
 
-// ==========================================
-// FUNCIÓN INFALIBLE PARA FORMATEAR A PESOS CHILENOS (CLP)
-// ==========================================
 function formatearPesoChileno(valor) {
     if (valor === undefined || valor === null || valor === "") return 'No especificado';
     let soloNumeros = String(valor).replace(/\D/g, ''); 
@@ -47,20 +33,14 @@ function formatearPesoChileno(valor) {
     return '$' + numero.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
-// ==========================================
-// FUNCIÓN PARA LIMPIAR TELÉFONOS DE EXCEL
-// ==========================================
 function formatearTelefonoExcel(valor) {
     if (valor === undefined || valor === null || valor === "") return 'No disponible';
     let texto = String(valor).trim();
-    texto = texto.replace(/\.0+$/, ''); // Remueve decimales
-    texto = texto.replace(/,/g, '');    // Remueve comas de miles
+    texto = texto.replace(/\.0+$/, ''); 
+    texto = texto.replace(/,/g, '');    
     return texto;
 }
 
-// ==========================================
-// 1. CONFIGURACIÓN DEL MAPA
-// ==========================================
 let map = L.map('map').setView([-33.4263, -70.6123], 13); 
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -173,9 +153,6 @@ async function buscarCentrosSalud() {
     }
 }
 
-// ==========================================
-// 2. CONFIGURACIÓN DEL CHAT DE IA (GROQ + GRÁFICOS)
-// ==========================================
 const btnEnviar = document.getElementById('btn-enviar');
 const userInput = document.getElementById('user-input');
 const chatBox = document.getElementById('chat-box');
