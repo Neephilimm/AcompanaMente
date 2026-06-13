@@ -185,7 +185,9 @@ btnEnviar.addEventListener('click', async () => {
         if (data.error) {
             chatBox.innerHTML += `<div class="ai-msg" style="color: red;"><b>Error:</b> ${data.error}</div>`;
         } else if (data.respuesta) {
-            let textoIA = data.respuesta;
+            
+            // LIMPIEZA ANTI-HUECOS: Reducimos cualquier salto de línea excesivo a un formato normal
+            let textoIA = data.respuesta.replace(/\n{2,}/g, '\n\n');
             
             if (textoIA.includes("DATOS:")) {
                 const partes = textoIA.split("DATOS:");
