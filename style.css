@@ -1,201 +1,240 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apoyo y Salud Mental Cercana - Providencia</title>
-    
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="style.css">
+function abrirPestana(evt, idPestana) {
+    const contenidos = document.getElementsByClassName("tab-content");
+    for (let i = 0; i < contenidos.length; i++) {
+        contenidos[i].classList.remove("active");
+    }
 
-    <style>
-        .tab-menu {
-            display: flex;
-            justify-content: center;
-            background-color: #2c3e50;
-            padding: 10px 0;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            flex-wrap: wrap;
-        }
-        .tab-btn {
-            background-color: transparent;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            margin: 0 5px;
-            font-size: 1.1em;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: all 0.3s;
-            font-weight: bold;
-        }
-        .tab-btn:hover {
-            background-color: #34495e;
-        }
-        .tab-btn.active {
-            background-color: #3498db;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.4s;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .equipo-card {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .integrantes-lista {
-            font-size: 1.1em;
-            line-height: 1.8;
-            color: #2c3e50;
-            margin-top: 15px;
-            padding-left: 20px;
-        }
-        /* Estilo para las cajas de instrucciones */
-        .info-box {
-            background-color: #e8f4f8;
-            border-left: 4px solid #3498db;
-            padding: 12px 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-            font-size: 0.95em;
-            color: #2c3e50;
-            line-height: 1.5;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <a href="https://neephilimm.github.io/AcompanaMente/" style="text-decoration: none; color: inherit; display: block;">
-            <h1>Red de Apoyo de Salud Mental</h1>
-            <p>Encuentra centros de atención cercanos en la comuna de Providencia, Chile y resuelve tus dudas.</p>
-        </a>
-    </header>
+    const botones = document.getElementsByClassName("tab-btn");
+    for (let i = 0; i < botones.length; i++) {
+        botones[i].classList.remove("active");
+    }
 
-    <nav class="tab-menu">
-        <button class="tab-btn active" onclick="abrirPestana(event, 'tab-portada')">Portada</button>
-        <button class="tab-btn" onclick="abrirPestana(event, 'tab-mapa')">Mapa y Chatbot</button>
-        <button class="tab-btn" onclick="abrirPestana(event, 'tab-videos')">Videos</button>
-        <button class="tab-btn" onclick="abrirPestana(event, 'tab-nosotros')">Quiénes Somos</button>
-    </nav>
+    document.getElementById(idPestana).classList.add("active");
+    evt.currentTarget.classList.add("active");
 
-    <div id="tab-portada" class="tab-content active">
-        <div style="max-width: 900px; margin: 0 auto; text-align: center; padding: 20px;">
-            <h2 style="color: #2c3e50; font-size: 2em; margin-bottom: 20px;">Bienvenido a AcompanaMente</h2>
-            <p style="font-size: 1.2em; line-height: 1.6; color: #555; margin-bottom: 40px;">
-                Este proyecto nace con el propósito de democratizar el acceso a la información sobre salud mental a nivel local en la comuna de Providencia. 
-                Nuestra plataforma te permite explorar los centros de atención más cercanos a tu ubicación, comparar precios y calificaciones, 
-                todo guiado por un asistente de inteligencia artificial capacitado para brindarte contención emocional de primera línea.
-            </p>
-            <hr style="border: 1px solid #eee; margin: 40px 0;">
-            <h3 style="color: #e74c3c; margin-bottom: 20px;">Líneas de Emergencia Nacional (24/7)</h3>
-            <p>Si tú o alguien que conoces está en crisis, la ayuda es gratuita y confidencial:</p>
-            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
-                <div style="background: #fff; padding: 15px 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid #e74c3c;">
-                    <b>Salud Responde</b><br><span style="font-size: 1.2em; color: #e74c3c; font-weight: bold;">600 360 77 77</span>
-                </div>
-                <div style="background: #fff; padding: 15px 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid #3498db;">
-                    <b>Prevención del Suicidio</b><br><span style="font-size: 1.2em; color: #3498db; font-weight: bold;">*4141</span>
-                </div>
-            </div>
-        </div>
-    </div>
+    if (idPestana === 'tab-mapa' && map) {
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+    }
+}
 
-    <div id="tab-mapa" class="tab-content">
-        <main class="container">
-            <!-- SECCIÓN DEL MAPA CON INTRODUCCIÓN -->
-            <section class="map-section">
-                <h2>Centros Cercanos en Providencia</h2>
-                <div class="info-box">
-                    <b>📍 ¿Cómo usar el mapa?</b><br>
-                    1. Presiona <b>"Buscar cerca de mi ubicación"</b> y permite el acceso a tu GPS para que el sistema calcule a cuántos kilómetros estás de cada centro.<br>
-                    2. Haz clic en los marcadores del mapa para ver los detalles: valor por cita, calificación, volumen de reseñas, dirección y contacto telefónico.
-                </div>
-                <button id="btn-ubicar" class="primary-btn">Buscar cerca de mi ubicación</button>
-                <div id="map"></div>
-            </section>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzw-Ojl3VhtKLOsZwJUE7WWT-xzNPU5b5WDtQskBgEzg1y1vw2H8ez5b6gOpCxlowow/exec';
 
-            <!-- SECCIÓN DEL CHATBOT CON INTRODUCCIÓN -->
-            <section class="ai-section">
-                <h2>Asistente de Orientación</h2>
-                <div class="info-box">
-                    <b>💬 ¿Cómo hablar con el Asistente?</b><br>
-                    Puedes pedirle recomendaciones cruzando datos (ej. <i>"¿Cuál es el centro más económico y con mejor calificación?"</i>), solicitarle contención emocional si te sientes abrumado, o pedirle que genere un <b>gráfico visual</b> de tus emociones actuales. Todo es 100% confidencial.
-                </div>
-                <div id="chat-box" class="chat-box">
-                    <p class="ai-msg">Hola, estoy aquí para escucharte y orientarte. ¿En qué te puedo ayudar hoy?</p>
-                </div>
-                <div class="input-area">
-                    <input type="text" id="user-input" placeholder="Escribe tu consulta aquí...">
-                    <button id="btn-enviar">Enviar</button>
-                </div>
-            </section>
-        </main>
-    </div>
+let currentLat = null;
+let currentLng = null;
+let userMarker = null;
 
-    <div id="tab-videos" class="tab-content">
-        <div style="max-width: 900px; margin: 40px auto; text-align: center;">
-            <h2 style="color: #2c3e50;">Cápsulas de Salud Mental</h2>
+function formatearPesoChileno(valor) {
+    if (valor === undefined || valor === null || valor === "") return 'No especificado';
+    let soloNumeros = String(valor).replace(/\D/g, ''); 
+    if (soloNumeros === "") return valor; 
+    let numero = parseInt(soloNumeros, 10);
+    return '$' + numero.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function formatearTelefonoExcel(valor) {
+    if (valor === undefined || valor === null || valor === "") return 'No disponible';
+    let texto = String(valor).trim();
+    texto = texto.replace(/\.0+$/, ''); 
+    texto = texto.replace(/,/g, '');    
+    return texto;
+}
+
+let map = L.map('map').setView([-33.4263, -70.6123], 13); 
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+const btnUbicar = document.getElementById('btn-ubicar');
+
+btnUbicar.addEventListener('click', () => {
+    if (navigator.geolocation) {
+        btnUbicar.innerText = "Buscando...";
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                currentLat = position.coords.latitude;
+                currentLng = position.coords.longitude;
+                
+                map.setView([currentLat, currentLng], 14);
+                
+                if(userMarker) map.removeLayer(userMarker);
+                
+                userMarker = L.circleMarker([currentLat, currentLng], {
+                    radius: 9,
+                    fillColor: "#0078ff",
+                    color: "#ffffff",
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map).bindPopup("<b>Estás aquí</b>").openPopup();
+                
+                buscarCentrosSalud();
+                btnUbicar.innerText = "Ubicación encontrada";
+            },
+            () => {
+                alert("Mostrando centros sin tu ubicación exacta.");
+                buscarCentrosSalud();
+                btnUbicar.innerText = "Buscar cerca de mi ubicación";
+            }
+        );
+    } else {
+        alert("Tu navegador no soporta geolocalización.");
+    }
+});
+
+async function buscarCentrosSalud() {
+    try {
+        const response = await fetch(APPS_SCRIPT_URL);
+        const data = await response.json();
+
+        if (data.error) {
+            console.error("Error desde el servidor:", data.error);
+            return;
+        }
+
+        data.forEach(centro => {
+            const keys = Object.keys(centro);
+            const nombreKey = keys.find(k => k.toLowerCase().replace(/[\s_]/g, '') === 'nombre') || 'Nombre';
+            const valorIndKey = keys.find(k => k.toLowerCase().replace(/[\s_]/g, '') === 'valorindividual') || 'Valor_Individual';
+            const contactoKey = keys.find(k => k.toLowerCase().replace(/[\s_]/g, '') === 'contacto') || 'Contacto';
+            const calificacionKey = keys.find(k => k.toLowerCase().includes('calific')) || 'Calificación';
+            const resenasKey = keys.find(k => k.toLowerCase().includes('reseñ') || k.toLowerCase().includes('resen')) || 'Cantidad de Reseñas';
+            const ubicacionKey = keys.find(k => k.toLowerCase().includes('ubicac')) || 'Ubicacion';
+            const latKey = keys.find(k => k.toLowerCase().replace(/[\s_]/g, '') === 'latitud') || 'Latitud';
+            const lngKey = keys.find(k => k.toLowerCase().replace(/[\s_]/g, '') === 'longitud') || 'Longitud';
+
+            const latitud = parseFloat(centro[latKey]);
+            const longitud = parseFloat(centro[lngKey]);
             
-            <!-- INTRODUCCIÓN DE LA SECCIÓN DE VIDEOS -->
-            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; text-align: left; border-left: 4px solid #2ecc71;">
-                <h3 style="color: #2c3e50; margin-bottom: 10px;">Presentación Audiovisual</h3>
-                <p style="font-size: 1.1em; color: #555; line-height: 1.6;">
-                    En AcompanaMente sabemos que la información visual y directa es fundamental. En esta sección encontrarás una galería de cápsulas de video preparadas por nuestro equipo universitario. 
-                    Nuestro objetivo es brindarte contenido psicoeducativo claro, ejercicios de relajación rápidos y consejos para el bienestar emocional del día a día, todo en un formato fácil de consumir.
-                </p>
-                <p style="font-size: 1.1em; color: #555; line-height: 1.6; margin-top: 10px;">
-                    <b>¡Vuelve pronto para ver nuestro primer material!</b>
-                </p>
-            </div>
+            if (!isNaN(latitud) && !isNaN(longitud)) {
+                const valorIndividualF = formatearPesoChileno(centro[valorIndKey]);
+                const telefonoF = formatearTelefonoExcel(centro[contactoKey]);
+                
+                let rawCalif = centro[calificacionKey];
+                let calificacionF = "Sin registrar";
+                if (rawCalif !== undefined && rawCalif !== null && String(rawCalif).trim() !== "") {
+                    let numLimpio = String(rawCalif).replace('$', '').trim();
+                    let valorNumerico = parseFloat(numLimpio);
+                    if (!isNaN(valorNumerico)) {
+                        calificacionF = `⭐ ${valorNumerico.toFixed(1)} / 5.0`;
+                    } else {
+                        calificacionF = numLimpio; 
+                    }
+                }
 
-            <div style="margin-top: 30px; padding: 50px; background: #ecf0f1; border-radius: 10px; border: 2px dashed #bdc3c7;">
-                <h3 style="color: #95a5a6;">Espacio reservado para videos (Próximamente)</h3>
-            </div>
-        </div>
-    </div>
+                let rawResenas = centro[resenasKey];
+                let resenasF = "0";
+                if (rawResenas !== undefined && rawResenas !== null && String(rawResenas).trim() !== "") {
+                    let resLimpio = String(rawResenas).replace(/\.0+$/, '').replace(/,/g, '').trim();
+                    if(resLimpio !== "") resenasF = resLimpio;
+                }
 
-    <div id="tab-nosotros" class="tab-content">
-        <div class="equipo-card">
-            <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">Quiénes Somos</h2>
-            <p style="font-size: 1.1em; color: #555;">
-                Somos un equipo de estudiantes de la <b>Universidad Autónoma de Chile</b>, de la sede en <b>Santiago de Chile</b>. 
-                Hemos desarrollado este proyecto tecnológico con el objetivo de facilitar el acceso a la atención psicológica y brindar un apoyo inicial a nuestra comunidad.
-            </p>
-            <h3 style="color: #3498db; margin-top: 30px;">Nuestro Equipo (TDI)</h3>
-            <ul class="integrantes-lista">
-                <li>Fernanda Marín</li>
-                <li>Luciano Poblete</li>
-                <li>Luciano Salazar</li>
-                <li>Mateo Segovia</li>
-                <li>Pablo Alarcón</li>
-            </ul>
-            <h3 style="color: #3498db; margin-top: 30px;">Contacto</h3>
-            <p style="font-size: 1.1em; margin: 5px 0;">📧 <b>Email:</b> <a href="mailto:tdimediocontacto@gmail.com" style="color: #2c3e50;">tdimediocontacto@gmail.com</a></p>
-            <p style="font-size: 1.1em; margin: 5px 0;">📞 <b>Teléfono / WhatsApp:</b> +56 9 6321 1443</p>
-            <p style="font-size: 1.1em; margin: 5px 0;">📷 <b>Instagram:</b> <a href="https://instagram.com/tdi.cl" target="_blank" style="color: #e1306c;">@tdi.cl</a></p>
-            <div style="margin-top: 30px; text-align: center;">
-                <a href="https://tdinoticias.github.io/web" target="_blank" style="display: inline-block; background: #3498db; color: white; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 5px; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                    Visita Nuestra Página Web Oficial
-                </a>
-            </div>
-        </div>
-    </div>
+                L.marker([latitud, longitud]).addTo(map)
+                 .bindPopup(`
+                    <div style="font-family: 'Segoe UI', Arial, sans-serif; min-width: 230px; max-width: 290px;">
+                        <b style="color: #2c3e50; font-size: 1.15em; display: block; margin-bottom: 5px;">${centro[nombreKey] || 'Centro de Salud'}</b>
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 6px 0;">
+                        
+                        <p style="margin: 4px 0;"><b>🧠 Valor Cita:</b> <span style="color: #2c3e50; font-weight: bold;">${valorIndividualF}</span></p>
+                        <p style="margin: 4px 0;"><b>📊 Calificación:</b> <span style="color: #2c3e50; font-weight: bold;">${calificacionF}</span></p>
+                        <p style="margin: 2px 0 4px 0; font-size: 0.9em; color: #666; padding-left: 2px;">💬 ${resenasF} reseñas totales</p>
+                        
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 6px 0;">
+                        <p style="margin: 4px 0; font-size: 0.95em;"><b>📍 Ubicación:</b> ${centro[ubicacionKey] || 'No específica'}</p>
+                        <p style="margin: 4px 0; font-size: 0.95em;"><b>📞 Contacto:</b> ${telefonoF}</p>
+                    </div>
+                 `);
+            }
+        });
+    } catch (error) {
+        console.error("Error al conectar con el servidor de datos:", error);
+    }
+}
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="app.js"></script>
-</body>
-</html>
+const btnEnviar = document.getElementById('btn-enviar');
+const userInput = document.getElementById('user-input');
+const chatBox = document.getElementById('chat-box');
+
+btnEnviar.addEventListener('click', async () => {
+    const texto = userInput.value.trim();
+    if (!texto) return;
+
+    chatBox.innerHTML += `<div class="user-msg">${texto}</div>`;
+    userInput.value = '';
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    const loadingId = 'loading-' + Date.now();
+    chatBox.innerHTML += `<div id="${loadingId}" class="ai-msg">Escribiendo...</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ 
+                prompt: texto,
+                userLat: currentLat,
+                userLng: currentLng
+            })
+        });
+        
+        const data = await response.json();
+        document.getElementById(loadingId).remove();
+        
+        if (data.error) {
+            chatBox.innerHTML += `<div class="ai-msg" style="color: red;"><b>Error:</b> ${data.error}</div>`;
+        } else if (data.respuesta) {
+            
+            let textoIA = data.respuesta.replace(/\n{2,}/g, '\n\n');
+            
+            if (textoIA.includes("DATOS:")) {
+                const partes = textoIA.split("DATOS:");
+                textoIA = partes[0].trim(); 
+                
+                const rawData = partes[1].replace(/\[|\]/g, '').trim(); 
+                
+                const canvasId = 'chart-' + Date.now();
+                chatBox.innerHTML += `<div class="ai-msg">${textoIA}<br><br><canvas id="${canvasId}" style="max-width: 100%;"></canvas></div>`;
+                
+                const etiquetas = [];
+                const valores = [];
+                
+                rawData.split(',').forEach(item => {
+                    const datosItem = item.split('-');
+                    if(datosItem.length === 2) { 
+                        etiquetas.push(datosItem[0].trim());
+                        valores.push(parseInt(datosItem[1].trim()));
+                    }
+                });
+                
+                new Chart(document.getElementById(canvasId), {
+                    type: 'bar', 
+                    data: {
+                        labels: etiquetas,
+                        datasets: [{
+                            label: 'Nivel Emocional',
+                            data: valores,
+                            backgroundColor: ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6']
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: { beginAtZero: true, max: 10 } 
+                        }
+                    }
+                });
+            } else {
+                chatBox.innerHTML += `<div class="ai-msg">${textoIA}</div>`;
+            }
+        }
+    } catch (error) {
+        document.getElementById(loadingId).remove();
+        chatBox.innerHTML += `<div class="ai-msg" style="color: red;">Error de conexión.</div>`;
+    }
+    chatBox.scrollTop = chatBox.scrollHeight;
+});
+
+userInput.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') btnEnviar.click();
+});
