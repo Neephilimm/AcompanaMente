@@ -5,21 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apoyo y Salud Mental Cercana - Providencia</title>
     
+    <!-- FAVICON: Logo en la pestaña del navegador -->
     <link rel="icon" type="image/png" href="https://i.imgur.com/GBooJsE.png">
     
+    <!-- Librería del Mapa -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Librería de Gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <!-- DISEÑO VISUAL UNIFICADO Y NUEVA PALETA DE COLORES -->
     <style>
-        /* PALETA DE COLORES MODIFICABLE */
-        /* Sustituye estos códigos de color (#) por los tonos exactos de tu logotipo */
+        /* TU PALETA DE COLORES EXACTA */
         :root {
-            --color-primario: #1F3A52;    /* Color de fondo en cabecera, menús y títulos */
-            --color-secundario: #2E86C1;  /* Color para destacar pestañas y botones del mapa */
-            --color-acento: #28B463;      /* Color verde asignado al botón de enviar consulta */
-            --color-alerta: #E74C3C;      /* Color rojo destinado a las llamadas de emergencia */
-            --fondo-sitio: #F4F7F6;       /* Color de fondo general de la aplicación web */
-            --texto-principal: #333333;   /* Color gris oscuro para garantizar la legibilidad */
+            --color-primario: #315937;    /* Verde oscuro: Cabeceras y textos clave */
+            --color-secundario: #56735D;  /* Verde medio: Botones y pestañas activas */
+            --color-acento: #6D8C72;      /* Verde suave: Botón de enviar chat y detalles */
+            --color-interfaz: #94A696;    /* Verde grisáceo: Hover y fondos de mensajes IA */
+            --fondo-sitio: #F2F2F2;       /* Tu color claro para el fondo general */
+            
+            --color-alerta: #E74C3C;      /* Rojo mantenido SOLO para el estándar de emergencia médica */
+            --texto-principal: #333333;   
         }
 
         /* Estilos Generales de la Interfaz */
@@ -27,12 +32,12 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--fondo-sitio); color: var(--texto-principal); }
         header { background-color: var(--color-primario); color: white; text-align: center; padding: 20px 10px; }
         header a { text-decoration: none; color: inherit; display: block; }
-        header p { font-size: 1.1em; margin-top: 5px; color: #bdc3c7; }
+        header p { font-size: 1.1em; margin-top: 5px; color: #F2F2F2; opacity: 0.9; }
 
         /* Estructura del Menú Navegable (Pestañas) */
         .tab-menu { display: flex; justify-content: center; background-color: var(--color-primario); padding: 10px 0; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); flex-wrap: wrap; }
         .tab-btn { background-color: transparent; color: white; border: none; padding: 12px 24px; margin: 0 5px; font-size: 1.1em; cursor: pointer; border-radius: 5px; transition: all 0.3s; font-weight: bold; }
-        .tab-btn:hover { background-color: rgba(255, 255, 255, 0.1); }
+        .tab-btn:hover { background-color: var(--color-interfaz); color: white; }
         .tab-btn.active { background-color: var(--color-secundario); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .tab-content { display: none; animation: fadeIn 0.4s; }
         .tab-content.active { display: block; }
@@ -44,36 +49,37 @@
         h2 { color: var(--color-primario); margin-bottom: 15px; font-size: 1.5em; border-bottom: 2px solid var(--color-secundario); padding-bottom: 5px; }
         
         /* Cajas de Instrucciones para Usuarios */
-        .info-box { background-color: #e8f4f8; border-left: 4px solid var(--color-secundario); padding: 12px 15px; margin-bottom: 20px; border-radius: 4px; font-size: 0.95em; color: var(--color-primario); line-height: 1.5; }
+        .info-box { background-color: rgba(148, 166, 150, 0.15); border-left: 4px solid var(--color-secundario); padding: 12px 15px; margin-bottom: 20px; border-radius: 4px; font-size: 0.95em; color: var(--color-primario); line-height: 1.5; font-weight: 500; }
         
         /* Botones e Inicialización de Mapa */
         .primary-btn { background-color: var(--color-secundario); color: white; border: none; padding: 10px 15px; font-size: 1em; border-radius: 5px; cursor: pointer; margin-bottom: 15px; width: 100%; transition: background-color 0.3s; font-weight: bold; }
-        .primary-btn:hover { filter: brightness(0.9); }
+        .primary-btn:hover { background-color: var(--color-primario); }
         #map { height: 400px; border-radius: 8px; border: 1px solid #ddd; z-index: 1; }
 
         /* Cuadro de Diálogo del Chatbot */
-        .chat-box { height: 340px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; padding: 15px; background-color: #fafafa; display: flex; flex-direction: column; margin-bottom: 15px; }
-        .ai-msg { background-color: #e8f4f8; color: var(--color-primario); padding: 12px 18px; border-radius: 10px; margin: 10px 0; max-width: 85%; align-self: flex-start; white-space: pre-line; line-height: 1.5; border-left: 4px solid var(--color-secundario); }
+        .chat-box { height: 340px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; padding: 15px; background-color: white; display: flex; flex-direction: column; margin-bottom: 15px; }
+        .ai-msg { background-color: rgba(148, 166, 150, 0.2); color: var(--color-primario); padding: 12px 18px; border-radius: 10px; margin: 10px 0; max-width: 85%; align-self: flex-start; white-space: pre-line; line-height: 1.5; border-left: 4px solid var(--color-secundario); font-weight: 500; }
         .user-msg { background-color: var(--color-secundario); color: white; padding: 12px 18px; border-radius: 10px; margin: 10px 0; max-width: 85%; align-self: flex-end; line-height: 1.5; }
         .input-area { display: flex; gap: 10px; }
         .input-area input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; }
-        .input-area button { background-color: var(--color-acento); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold; transition: filter 0.3s; }
-        .input-area button:hover { filter: brightness(0.9); }
+        .input-area button { background-color: var(--color-acento); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold; transition: background-color 0.3s; }
+        .input-area button:hover { background-color: var(--color-secundario); }
 
         /* Perfil de Equipo Académico y Cajas Informativas */
         .equipo-card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto; }
-        .integrantes-lista { font-size: 1.1em; line-height: 1.8; color: var(--color-primario); margin-top: 15px; padding-left: 20px; }
+        .integrantes-lista { font-size: 1.1em; line-height: 1.8; color: var(--color-primario); margin-top: 15px; padding-left: 20px; font-weight: 500; }
         
         /* Enlaces de emergencia interactivos (Hover) */
         .enlace-emergencia { text-decoration: none; color: inherit; display: block; transition: transform 0.2s; }
         .enlace-emergencia:hover { transform: translateY(-3px); }
         .emergencia-card { background: #fff; padding: 15px 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--color-alerta); }
-        .emergencia-card-azul { background: #fff; padding: 15px 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--color-secundario); }
+        .emergencia-card-verde { background: #fff; padding: 15px 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--color-secundario); }
     </style>
 </head>
 <body>
     <header>
         <a href="https://neephilimm.github.io/AcompanaMente/">
+            <!-- LOGOTIPO INTEGRADO EN LA CABECERA -->
             <img src="https://i.imgur.com/GBooJsE.png" alt="Logo AcompañaMente" style="max-width: 140px; height: auto; margin-bottom: 10px; border-radius: 8px;">
             <h1>Red de Apoyo de Salud Mental</h1>
             <p>Encuentra centros de atención cercanos en la comuna de Providencia, Chile y resuelve tus dudas.</p>
@@ -87,6 +93,7 @@
         <button class="tab-btn" onclick="abrirPestana(event, 'tab-nosotros')">Quiénes Somos</button>
     </nav>
 
+    <!-- PESTAÑA 1: PORTADA PRINCIPAL -->
     <div id="tab-portada" class="tab-content active">
         <div style="max-width: 900px; margin: 0 auto; text-align: center; padding: 20px;">
             <h2 style="color: var(--color-primario); font-size: 2em; margin-bottom: 20px; border:none;">Bienvenido a AcompañaMente</h2>
@@ -95,11 +102,12 @@
                 Nuestra plataforma te permite explorar los centros de atención más cercanos a tu ubicación, comparar precios y calificaciones, 
                 todo guiado por un asistente de inteligencia artificial capacitado para brindarte contención emocional de primera línea.
             </p>
-            <hr style="border: 1px solid #eee; margin: 40px 0;">
+            <hr style="border: 1px solid #ddd; margin: 40px 0;">
             <h3 style="color: var(--color-alerta); margin-bottom: 20px;">Líneas de Emergencia Nacional (24/7)</h3>
             <p>Si tú o alguien que conoces está en crisis, la ayuda es gratuita y confidencial:</p>
             
             <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
+                <!-- BLOQUES CLICABLES PARA LLAMADAS DIRECTAS (tel:) -->
                 <a href="tel:6003607777" class="enlace-emergencia">
                     <div class="emergencia-card">
                         <b>Salud Responde</b><br><span style="font-size: 1.2em; color: var(--color-alerta); font-weight: bold;">600 360 77 77</span>
@@ -107,7 +115,7 @@
                 </a>
                 
                 <a href="tel:*4141" class="enlace-emergencia">
-                    <div class="emergencia-card-azul">
+                    <div class="emergencia-card-verde">
                         <b>Prevención del Suicidio</b><br><span style="font-size: 1.2em; color: var(--color-secundario); font-weight: bold;">*4141</span>
                     </div>
                 </a>
@@ -115,6 +123,7 @@
         </div>
     </div>
 
+    <!-- PESTAÑA 2: MAPA INTERACTIVO Y ASISTENTE VIRTUAL -->
     <div id="tab-mapa" class="tab-content">
         <main class="container">
             <section class="map-section">
@@ -145,28 +154,30 @@
         </main>
     </div>
 
+    <!-- PESTAÑA 3: CÁPSULAS AUDIOVISUALES -->
     <div id="tab-videos" class="tab-content">
         <div style="max-width: 900px; margin: 40px auto; text-align: center;">
             <h2 style="color: var(--color-primario); border:none;">Cápsulas de Salud Mental</h2>
             <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; text-align: left; border-left: 4px solid var(--color-acento);">
                 <h3 style="color: var(--color-primario); margin-bottom: 10px;">Presentación Audiovisual</h3>
                 <p style="font-size: 1.1em; color: #555; line-height: 1.6;">
-                    En AcompañaMente sabemos que la información visual y directa es fundamental. En esta sección encontrarás una galaría de cápsulas de video preparadas por nuestro equipo universitario. 
+                    En AcompañaMente sabemos que la información visual y directa es fundamental. En esta sección encontrarás una galería de cápsulas de video preparadas por nuestro equipo universitario. 
                     Nuestro objetivo es brindarte contenido psicoeducativo claro, ejercicios de relajación rápidos y consejos para el bienestar emocional del día a día, todo en un formato fácil de consumir.
                 </p>
                 <p style="font-size: 1.1em; color: #555; line-height: 1.6; margin-top: 10px;">
                     <b>¡Vuelve pronto para ver nuestro primer material!</b>
                 </p>
             </div>
-            <div style="margin-top: 30px; padding: 50px; background: #ecf0f1; border-radius: 10px; border: 2px dashed #bdc3c7;">
-                <h3 style="color: #95a5a6;">Espacio reservado para videos (Próximamente)</h3>
+            <div style="margin-top: 30px; padding: 50px; background: var(--fondo-sitio); border-radius: 10px; border: 2px dashed var(--color-interfaz);">
+                <h3 style="color: var(--color-secundario);">Espacio reservado para videos (Próximamente)</h3>
             </div>
         </div>
     </div>
 
+    <!-- PESTAÑA 4: PRESENTACIÓN DEL EQUIPO -->
     <div id="tab-nosotros" class="tab-content">
         <div class="equipo-card">
-            <h2 style="color: var(--color-primario); border-bottom: 2px solid #3498db; padding-bottom: 10px;">Quiénes Somos</h2>
+            <h2 style="color: var(--color-primario); border-bottom: 2px solid var(--color-secundario); padding-bottom: 10px;">Quiénes Somos</h2>
             <p style="font-size: 1.1em; color: #555;">
                 Somos un equipo de estudiantes de la <b>Universidad Autónoma de Chile</b>, de la sede en <b>Santiago de Chile</b>. 
                 Hemos desarrollado este proyecto tecnológico con el objetivo de facilitar el acceso a la atención psicológica y brindar un apoyo inicial a nuestra comunidad.
@@ -182,7 +193,7 @@
             <h3 style="color: var(--color-secundario); margin-top: 30px;">Contacto</h3>
             <p style="font-size: 1.1em; margin: 5px 0;">📧 <b>Email:</b> <a href="mailto:tdimediocontacto@gmail.com" style="color: var(--color-primario);">tdimediocontacto@gmail.com</a></p>
             <p style="font-size: 1.1em; margin: 5px 0;">📞 <b>Teléfono / WhatsApp:</b> +56 9 6321 1443</p>
-            <p style="font-size: 1.1em; margin: 5px 0;">📷 <b>Instagram:</b> <a href="https://instagram.com/tdi.cl" target="_blank" style="color: #e1306c;">@tdi.cl</a></p>
+            <p style="font-size: 1.1em; margin: 5px 0;">📷 <b>Instagram:</b> <a href="https://instagram.com/tdi.cl" target="_blank" style="color: var(--color-acento);">@tdi.cl</a></p>
             <div style="margin-top: 30px; text-align: center;">
                 <a href="https://tdinoticias.github.io/web" target="_blank" style="display: inline-block; background: var(--color-secundario); color: white; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 5px; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                     Visita Nuestra Página Web Oficial
