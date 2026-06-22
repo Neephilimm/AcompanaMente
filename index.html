@@ -244,7 +244,7 @@
     
     <script>
         // ==========================================
-        // SISTEMA DE PESTAÑAS (NAVEGACIÓN)
+        // SISTEMA DE PESTAÑAS Y SOLUCIÓN DEL MAPA INVISIBLE
         // ==========================================
         function abrirPestana(evt, nombrePestana) {
             var i, tabcontent, tablinks;
@@ -262,17 +262,29 @@
                 tablinks[i].classList.remove("active");
             }
             
-            // Mostrar la pestaña seleccionada y marcar el botón como activo
+            // Mostrar la pestaña seleccionada
             document.getElementById(nombrePestana).style.display = "block";
             document.getElementById(nombrePestana).classList.add("active");
             evt.currentTarget.classList.add("active");
+
+            // FIX: Forzar a Leaflet a recalcular su tamaño cuando se abre su pestaña
+            if (nombrePestana === 'tab-mapa') {
+                setTimeout(function() {
+                    // Disparamos un evento de cambio de tamaño en la ventana
+                    window.dispatchEvent(new Event('resize'));
+                    
+                    // Si la variable map es global, usamos su función oficial
+                    if (typeof map !== 'undefined' && map.invalidateSize) {
+                        map.invalidateSize();
+                    }
+                }, 200);
+            }
         }
 
         // ==========================================
         // BUSCADOR EN EL MAPA
         // ==========================================
         document.addEventListener("DOMContentLoaded", function() {
-            // Le damos 1.5 segundos de ventaja a app.js para que descargue los centros desde Google Sheets
             setTimeout(() => {
                 const btnBuscar = document.getElementById('btn-buscar-centro');
                 const inputBuscar = document.getElementById('buscador-centro');
@@ -281,7 +293,6 @@
                     const textoBusqueda = inputBuscar.value.toLowerCase().trim();
                     if (textoBusqueda === "") return;
 
-                    // Validamos que la variable global 'map' de app.js exista
                     if (typeof map === 'undefined') {
                         console.error("El mapa aún no está listo.");
                         return;
@@ -289,15 +300,11 @@
 
                     let encontrado = false;
 
-                    // Escaneamos todos los pines del mapa
                     map.eachLayer(function(layer) {
-                        // Si es un pin y tiene ventana emergente (popup)
                         if (layer instanceof L.Marker && layer.getPopup()) {
                             const contenidoPopup = layer.getPopup().getContent();
                             
-                            // Si el texto del popup incluye lo que escribió el usuario
                             if (contenidoPopup && contenidoPopup.toLowerCase().includes(textoBusqueda)) {
-                                // Vuela al punto con animación suave
                                 map.flyTo(layer.getLatLng(), 15, {
                                     animate: true,
                                     duration: 1.5
