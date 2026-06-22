@@ -4,74 +4,92 @@ document.addEventListener("DOMContentLoaded", function() {
     // ==========================================
     var map = L.map('map').setView([-33.4328, -70.6150], 14); 
     window.miMapaGlobal = map; 
-    window.userLat = null; // Guardará la latitud del usuario
-    window.userLng = null; // Guardará la longitud del usuario
-    window.marcadoresCentros = {}; // Guardará los centros para el buscador
+    window.userLat = null; 
+    window.userLng = null; 
+    window.marcadoresCentros = {}; 
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
     var centrosLayer = L.layerGroup().addTo(map);
 
-    // ¡AQUÍ ESTÁ TU ENLACE INTEGRADO!
     const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbzw-Ojl3VhtKLOsZwJUE7WWT-xzNPU5b5WDtQskBgEzg1y1vw2H8ez5b6gOpCxlowow/exec"; 
+    let listaCentrosData = []; // Guardará los datos en memoria antes de dibujarlos
 
     // ==========================================
-    // 2. CARGAR BASE DE DATOS Y CREAR LISTA DE BÚSQUEDA
+    // 2. CREACIÓN DE LISTA DE BÚSQUEDA (AUTOCOMPLETADO)
     // ==========================================
-    // Creamos la lista desplegable (datalist) invisible en el HTML
     const datalist = document.createElement('datalist');
     datalist.id = 'lista-centros-dinamica';
     document.body.appendChild(datalist);
     
-    // Le asignamos esa lista al buscador que ya tienes en el HTML
     const inputBuscar = document.getElementById('buscador-centro');
     if (inputBuscar) inputBuscar.setAttribute('list', 'lista-centros-dinamica');
 
-    async function cargarCentros() {
+    // Descarga los datos de Sheets al cargar la página para el buscador, pero NO los dibuja aún
+    async function preCargarDatos() {
         try {
             const respuesta = await fetch(URL_APPS_SCRIPT + "?action=getCentros"); 
-            const centros = await respuesta.json();
+            listaCentrosData = await respuesta.json();
 
-            centros.forEach(centro => {
-                if(centro.Latitud && centro.Longitud) {
-                    let lat = parseFloat(centro.Latitud);
-                    let lng = parseFloat(centro.Longitud);
-                    
-                    // 1. Crear el marcador en el mapa
-                    let infoHTML = `
-                        <div style="font-family: Arial; font-size: 14px;">
-                            <h3 style="color: #315937; margin-bottom: 5px;">${centro.Nombre}</h3>
-                            <b>📍 Dirección:</b> ${centro.Ubicación}<br>
-                            <b>💰 Valor:</b> ${centro.Valor_Individual}<br>
-                            <b>📞 Contacto:</b> ${centro.Contacto}<br>
-                            <b>⭐ Calificación:</b> ${centro.Calificacion}/5
-                        </div>
-                    `;
-                    var marker = L.marker([lat, lng]).bindPopup(infoHTML);
-                    centrosLayer.addLayer(marker);
-
-                    // 2. Guardar el marcador en la memoria para el buscador
-                    window.marcadoresCentros[centro.Nombre] = marker;
-
-                    // 3. Agregar el nombre exacto a la lista desplegable
+            listaCentrosData.forEach(centro => {
+                if(centro.Nombre) {
                     let opcion = document.createElement('option');
                     opcion.value = centro.Nombre;
                     datalist.appendChild(opcion);
                 }
             });
         } catch (error) {
-            console.error("Error al cargar Google Sheets:", error);
+            console.error("Error al precargar datos:", error);
         }
     }
     
-    // Ejecutamos la carga al iniciar
-    cargarCentros();
+    preCargarDatos();
 
     // ==========================================
-    // 3. BUSCADOR DE CENTROS (AUTOCOMPLETADO)
+    // 3. FUNCIÓN PARA DIBUJAR LOS CENTROS (AL CLICAR)
+    // ==========================================
+    function dibujarCentrosEnMapa() {
+        // Si ya están dibujados, no los duplica
+        if (Object.keys(window.marcadoresCentros).length > 0) return;
+
+        listaCentrosData.forEach(centro => {
+            if(centro.Latitud && centro.Longitud) {
+                let lat = parseFloat(centro.Latitud);
+                let lng = parseFloat(centro.Longitud);
+                
+                // Diseño de la tarjeta con teléfono clicable y botón de ruta a Google Maps
+                let infoHTML = `
+                    <div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; line-height: 1.5; min-width: 200px;">
+                        <h3 style="color: #315937; margin-bottom: 6px; font-size: 16px;">${centro.Nombre}</h3>
+                        <b>📍 Dirección:</b> ${centro.Ubicación}<br>
+                        <b>💰 Valor:</b> ${centro.Valor_Individual}<br>
+                        <b>📞 Contacto:</b> <a href="tel:${centro.Contacto}" style="color: #56735D; font-weight: bold; text-decoration: underline;">${centro.Contacto}</a><br>
+                        <b>⭐ Calificación:</b> ${centro['Calificación'] || 'N/A'}/5<br>
+                        
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" 
+                           style="display: block; text-align: center; background-color: #315937; color: white; padding: 8px; border-radius: 5px; text-decoration: none; font-weight: bold; margin-top: 10px; transition: 0.3s;">
+                           🚗 Pincha aquí para ir
+                        </a>
+                    </div>
+                `;
+                
+                var marker = L.marker([lat, lng]).bindPopup(infoHTML);
+                centrosLayer.addLayer(marker);
+
+                // Guardamos en memoria para el buscador
+                window.marcadoresCentros[centro.Nombre] = marker;
+            }
+        });
+    }
+
+    // ==========================================
+    // 4. BUSCADOR INTELIGENTE
     // ==========================================
     const btnBuscar = document.getElementById('btn-buscar-centro');
 
     function volarAlCentro() {
+        // Si el usuario busca un centro sin haber apretado el botón de GPS, los dibujamos automáticamente
+        dibujarCentrosEnMapa();
+
         const nombreSeleccionado = inputBuscar.value;
         const marcador = window.marcadoresCentros[nombreSeleccionado];
         
@@ -79,39 +97,48 @@ document.addEventListener("DOMContentLoaded", function() {
             map.flyTo(marcador.getLatLng(), 16, { animate: true, duration: 1.5 });
             marcador.openPopup();
         } else {
-            alert("Por favor, selecciona un centro válido de la lista desplegable.");
+            alert("Por favor, selecciona un centro válido de la lista.");
         }
     }
 
     if (btnBuscar) btnBuscar.addEventListener('click', volarAlCentro);
-    if (inputBuscar) {
-        inputBuscar.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') volarAlCentro();
-        });
-    }
+    if (inputBuscar) inputBuscar.addEventListener('keypress', e => { if (e.key === 'Enter') volarAlCentro(); });
 
     // ==========================================
-    // 4. GPS Y UBICACIÓN DEL USUARIO
+    // 5. GPS: UBICACIÓN DEL USUARIO (PUNTO AZUL)
     // ==========================================
     const btnUbicar = document.getElementById('btn-ubicar');
     if (btnUbicar) {
         btnUbicar.addEventListener('click', function() {
-            map.locate({setView: true, maxZoom: 16});
+            // Al hacer clic, mostramos los centros de la base de datos
+            dibujarCentrosEnMapa();
+            map.locate({setView: true, maxZoom: 15});
         });
     }
 
     map.on('locationfound', function(e) {
-        var radius = e.accuracy / 2;
-        L.marker(e.latlng).addTo(map).bindPopup("Estás aquí").openPopup();
-        L.circle(e.latlng, radius).addTo(map);
-        
-        // ¡CRUCIAL! Guardamos las coordenadas para enviarlas al Chatbot
+        // Guardar coordenadas para el chatbot
         window.userLat = e.latlng.lat;
         window.userLng = e.latlng.lng;
+
+        // MARCADOR ESTILO PUNTO AZUL RADAR (Sutil y moderno)
+        L.circleMarker(e.latlng, {
+            radius: 8,
+            fillColor: '#007bef', // Azul GPS estándar
+            color: '#ffffff',    // Borde blanco
+            weight: 3,
+            opacity: 1,
+            fillOpacity: 0.9
+        }).addTo(map).bindPopup("<b>Tu ubicación actual</b>").openPopup();
+    });
+
+    map.on('locationerror', function() {
+        alert("No se pudo obtener tu ubicación. Mostrando los centros disponibles en la comuna.");
+        dibujarCentrosEnMapa(); // Si falla el GPS, igual le mostramos los centros para no dejar el mapa vacío
     });
 
     // ==========================================
-    // 5. CHATBOT CON CONTEXTO COMPLETO
+    // 6. CHATBOT CON CONTEXTO
     // ==========================================
     const btnEnviar = document.getElementById('btn-enviar');
     const inputChat = document.getElementById('user-input');
@@ -133,7 +160,6 @@ document.addEventListener("DOMContentLoaded", function() {
             const peticion = await fetch(URL_APPS_SCRIPT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain' }, 
-                // ENVIAMOS EL MENSAJE + LAS COORDENADAS DEL USUARIO
                 body: JSON.stringify({ 
                     accion: "chat", 
                     mensaje: mensaje,
@@ -145,7 +171,6 @@ document.addEventListener("DOMContentLoaded", function() {
             const data = await peticion.json();
             document.getElementById(idEscribiendo).remove();
 
-            // Convierte enlaces web en formato HTML para que sean clicables (como los links de Google Maps)
             let respuestaFormateada = data.respuesta.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color: #315937; text-decoration: underline; font-weight: bold;">Ver en Google Maps</a>');
             
             chatBox.innerHTML += `<p class="ai-msg">${respuestaFormateada}</p>`;
@@ -153,7 +178,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         } catch (error) {
             document.getElementById(idEscribiendo).remove();
-            chatBox.innerHTML += `<p class="ai-msg" style="color:#E74C3C;"><b>Error:</b> Problema de conexión con el servidor.</p>`;
+            chatBox.innerHTML += `<p class="ai-msg" style="color:#E74C3C;"><b>Error:</b> Problema de conexión.</p>`;
         }
     }
 
