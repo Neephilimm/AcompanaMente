@@ -75,14 +75,16 @@
         .emergencia-card { background: #fff; padding: 15px 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--color-alerta); }
         .emergencia-card-verde { background: #fff; padding: 15px 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--color-secundario); }
         
-        /* Contenedor del Video de Presentación */
+        /* Contenedor del Video de Presentación (Portada) */
         .video-container { max-width: 750px; margin: 0 auto 30px auto; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 10px; overflow: hidden; background-color: #000; }
         .video-container video { display: block; width: 100%; }
 
-        /* Estilos para la galería de videos de Google Drive */
+        /* Estilos para la galería de videos de Google Drive (Pestaña Videos) */
         .drive-video-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 30px; }
-        .drive-video-card { flex: 1; min-width: 300px; max-width: 420px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-top: 4px solid var(--color-secundario); }
-        .drive-iframe-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; background-color: #f0f0f0; }
+        .drive-video-card { flex: 1; min-width: 300px; max-width: 420px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-top: 4px solid var(--color-secundario); display: flex; flex-direction: column; }
+        .drive-video-card h4 { color: var(--color-primario); font-size: 1.2em; margin-bottom: 8px; }
+        .drive-video-card p { font-size: 0.95em; color: #555; line-height: 1.5; margin-bottom: 15px; flex-grow: 1; }
+        .drive-iframe-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; background-color: #000; }
         .drive-iframe-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
     </style>
 </head>
@@ -134,7 +136,6 @@
             <p>Si tú o alguien que conoces está en crisis, la ayuda es gratuita y confidencial:</p>
             
             <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
-                <!-- BLOQUES CLICABLES PARA LLAMADAS DIRECTAS (tel:) -->
                 <a href="tel:6003607777" class="enlace-emergencia">
                     <div class="emergencia-card">
                         <b>Salud Responde</b><br><span style="font-size: 1.2em; color: var(--color-alerta); font-weight: bold;">600 360 77 77</span>
@@ -157,10 +158,20 @@
                 <h2>Centros Cercanos en Providencia</h2>
                 <div class="info-box">
                     <b>📍 ¿Cómo usar el mapa?</b><br>
-                    1. Presiona <b>"Buscar cerca de mi ubicación"</b> y permite el acceso a tu GPS para calcular distancias.<br>
-                    2. Haz clic en los marcadores azules del mapa para ver los detalles: valor, calificación, reseñas, dirección y teléfono.
+                    1. Puedes presionar <b>"Buscar cerca de mi ubicación"</b> para ver distancias.<br>
+                    2. O puedes escribir el nombre de un centro recomendado por el asistente para encontrarlo directamente en el mapa.
                 </div>
-                <button id="btn-ubicar" class="primary-btn">Buscar cerca de mi ubicación</button>
+                
+                <!-- NUEVA SECCIÓN DE CONTROLES: Ubicación + Buscador -->
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                    <button id="btn-ubicar" class="primary-btn" style="margin-bottom: 0;">📍 Buscar cerca de mi ubicación</button>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="buscador-centro" placeholder="🔍 Buscar centro por nombre (ej: Cesfam)..." style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; font-family: inherit;">
+                        <button id="btn-buscar-centro" style="background-color: var(--color-primario); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold; transition: 0.3s;">Buscar</button>
+                    </div>
+                </div>
+
                 <div id="map"></div>
             </section>
 
@@ -168,7 +179,7 @@
                 <h2>Asistente de Orientación</h2>
                 <div class="info-box">
                     <b>💬 ¿Cómo hablar con el Asistente?</b><br>
-                    Pídele recomendaciones cruzando datos (ej. <i>"¿Cuál es el centro más económico y mejor evaluado?"</i>), solicita contención emocional, o pide que genere un <b>gráfico visual</b> de tus emociones. Todo es confidencial.
+                    Pídele recomendaciones cruzando datos (ej. <i>"¿Cuál es el centro más económico?"</i>), solicita contención emocional, o pide que genere un <b>gráfico visual</b> de tus emociones. Todo es confidencial.
                 </div>
                 <div id="chat-box" class="chat-box">
                     <p class="ai-msg">Hola, estoy aquí para escucharte y orientarte. ¿En qué te puedo ayudar hoy?</p>
@@ -184,34 +195,33 @@
     <!-- PESTAÑA 3: CÁPSULAS AUDIOVISUALES -->
     <div id="tab-videos" class="tab-content">
         <div style="max-width: 900px; margin: 40px auto; text-align: center;">
-            <h2 style="color: var(--color-primario); border:none;">Cápsulas de Salud Mental</h2>
+            <h2 style="color: var(--color-primario); border:none;">Cápsulas y Entrevistas</h2>
             <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; text-align: left; border-left: 4px solid var(--color-acento);">
-                <h3 style="color: var(--color-primario); margin-bottom: 10px;">Presentación Audiovisual</h3>
+                <h3 style="color: var(--color-primario); margin-bottom: 10px;">Trabajo de Campo</h3>
                 <p style="font-size: 1.1em; color: #555; line-height: 1.6;">
-                    En AcompañaMente sabemos que la información visual y directa es fundamental. En esta sección encontrarás una galería de cápsulas de video preparadas por nuestro equipo universitario. 
-                    Nuestro objetivo es brindarte contenido psicoeducativo claro, ejercicios de relajación rápidos y consejos para el bienestar emocional del día a día, todo en un formato fácil de consumir.
+                    En AcompañaMente sabemos que el desarrollo de una herramienta tecnológica debe estar conectado con las necesidades reales de la comunidad. En esta sección te compartimos nuestro proceso de validación en terreno: desde explorar la percepción sobre la salud mental hasta poner a prueba nuestra aplicación directamente con los usuarios.
                 </p>
             </div>
             
-            <!-- GALERÍA DE VIDEOS (GOOGLE DRIVE) -->
             <div class="drive-video-grid">
                 <!-- Video 1 -->
                 <div class="drive-video-card">
-                    <h4 style="color: var(--color-primario); margin-bottom: 10px;">Cápsula Informativa 1</h4>
+                    <h4>Video 1: La Necesidad de Apoyo Estudiantil</h4>
+                    <p>En este primer video, salimos a conversar con los estudiantes para conocer su perspectiva sobre la salud mental y les preguntamos si sienten que hace falta una aplicación enfocada en apoyarlos.</p>
                     <div class="drive-iframe-wrapper">
-                        <iframe src="https://drive.google.com/file/d/1MELaAPXk2IcHJedqd8dH8pSQlsLwvFVb/preview" allow="autoplay" allowfullscreen></iframe>
+                        <iframe src="https://drive.google.com/file/d/1MELaAPXk2IcHJedqd8dH8pSQlsLwvFVb/preview" allow="autoplay; fullscreen" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
                     </div>
                 </div>
                 
                 <!-- Video 2 -->
                 <div class="drive-video-card">
-                    <h4 style="color: var(--color-primario); margin-bottom: 10px;">Cápsula Informativa 2</h4>
+                    <h4>Video 2: Prueba y Evaluación de la App</h4>
+                    <p>En nuestra segunda cápsula, invitamos a los usuarios a probar la plataforma en tiempo real. Les consultamos si la interfaz resultó intuitiva, recogimos sus recomendaciones y les pedimos evaluar la experiencia con una nota del 1 al 7.</p>
                     <div class="drive-iframe-wrapper">
-                        <iframe src="https://drive.google.com/file/d/1pJetIiR27vnlrMUR3GNFOng0xMnT8me5/preview" allow="autoplay" allowfullscreen></iframe>
+                        <iframe src="https://drive.google.com/file/d/1pJetIiR27vnlrMUR3GNFOng0xMnT8me5/preview" allow="autoplay; fullscreen" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
                     </div>
                 </div>
             </div>
-            
         </div>
     </div>
 
