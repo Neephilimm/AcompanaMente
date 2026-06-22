@@ -5,15 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apoyo y Salud Mental Cercana - Providencia</title>
     
-    <!-- FAVICON: Logo en la pestaña del navegador -->
     <link rel="icon" type="image/png" href="https://i.imgur.com/GBooJsE.png">
     
-    <!-- Librería del Mapa -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Librería de Gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- DISEÑO VISUAL UNIFICADO Y NUEVA PALETA DE COLORES -->
     <style>
         /* TU PALETA DE COLORES EXACTA */
         :root {
@@ -91,7 +87,6 @@
 <body>
     <header>
         <a href="https://neephilimm.github.io/AcompanaMente/">
-            <!-- LOGOTIPO INTEGRADO EN LA CABECERA -->
             <img src="https://i.imgur.com/GBooJsE.png" alt="Logo AcompañaMente" style="max-width: 140px; height: auto; margin-bottom: 10px; border-radius: 8px;">
             <h1>Red de Apoyo de Salud Mental</h1>
             <p>Encuentra centros de atención cercanos en la comuna de Providencia, Chile y resuelve tus dudas.</p>
@@ -105,7 +100,6 @@
         <button class="tab-btn" onclick="abrirPestana(event, 'tab-nosotros')">Quiénes Somos</button>
     </nav>
 
-    <!-- PESTAÑA 1: PORTADA PRINCIPAL -->
     <div id="tab-portada" class="tab-content active">
         <div style="max-width: 900px; margin: 0 auto; text-align: center; padding: 20px;">
             <h2 style="color: var(--color-primario); font-size: 2em; margin-bottom: 20px; border:none;">Bienvenido a AcompañaMente</h2>
@@ -117,13 +111,11 @@
 
             <hr style="border: 1px solid #ddd; margin: 30px 0; width: 50%; margin-left: auto; margin-right: auto;">
             
-            <!-- INTRODUCCIÓN AL VIDEO -->
             <h3 style="color: var(--color-secundario); font-size: 1.5em; margin-bottom: 10px;">Conoce Nuestro Proyecto</h3>
             <p style="font-size: 1.1em; color: #555; margin-bottom: 20px;">
                 Descubre cómo el equipo TDI estructuró esta plataforma tecnológica para democratizar el acceso a la salud mental.
             </p>
 
-            <!-- SECCIÓN DEL VIDEO DE PRESENTACIÓN (Con enlace de Imgur) -->
             <div class="video-container">
                 <video controls preload="metadata">
                     <source src="https://i.imgur.com/GHizA5d.mp4" type="video/mp4">
@@ -151,7 +143,6 @@
         </div>
     </div>
 
-    <!-- PESTAÑA 2: MAPA INTERACTIVO Y ASISTENTE VIRTUAL -->
     <div id="tab-mapa" class="tab-content">
         <main class="container">
             <section class="map-section">
@@ -162,7 +153,6 @@
                     2. O puedes escribir el nombre de un centro recomendado por el asistente para encontrarlo directamente en el mapa.
                 </div>
                 
-                <!-- NUEVA SECCIÓN DE CONTROLES: Ubicación + Buscador -->
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
                     <button id="btn-ubicar" class="primary-btn" style="margin-bottom: 0;">📍 Buscar cerca de mi ubicación</button>
                     
@@ -192,7 +182,6 @@
         </main>
     </div>
 
-    <!-- PESTAÑA 3: CÁPSULAS AUDIOVISUALES -->
     <div id="tab-videos" class="tab-content">
         <div style="max-width: 900px; margin: 40px auto; text-align: center;">
             <h2 style="color: var(--color-primario); border:none;">Cápsulas y Entrevistas</h2>
@@ -204,7 +193,6 @@
             </div>
             
             <div class="drive-video-grid">
-                <!-- Video 1 -->
                 <div class="drive-video-card">
                     <h4>Video 1: La Necesidad de Apoyo Estudiantil</h4>
                     <p>En este primer video, salimos a conversar con los estudiantes para conocer su perspectiva sobre la salud mental y les preguntamos si sienten que hace falta una aplicación enfocada en apoyarlos.</p>
@@ -213,7 +201,6 @@
                     </div>
                 </div>
                 
-                <!-- Video 2 -->
                 <div class="drive-video-card">
                     <h4>Video 2: Prueba y Evaluación de la App</h4>
                     <p>En nuestra segunda cápsula, invitamos a los usuarios a probar la plataforma en tiempo real. Les consultamos si la interfaz resultó intuitiva, recogimos sus recomendaciones y les pedimos evaluar la experiencia con una nota del 1 al 7.</p>
@@ -225,7 +212,6 @@
         </div>
     </div>
 
-    <!-- PESTAÑA 4: PRESENTACIÓN DEL EQUIPO -->
     <div id="tab-nosotros" class="tab-content">
         <div class="equipo-card">
             <h2 style="color: var(--color-primario); border-bottom: 2px solid var(--color-secundario); padding-bottom: 10px;">Quiénes Somos</h2>
@@ -255,5 +241,58 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="app.js"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Le damos 1.5 segundos de ventaja a app.js para que descargue los centros desde Google Sheets
+            setTimeout(() => {
+                const btnBuscar = document.getElementById('btn-buscar-centro');
+                const inputBuscar = document.getElementById('buscador-centro');
+
+                function buscarEnMapa() {
+                    const textoBusqueda = inputBuscar.value.toLowerCase().trim();
+                    if (textoBusqueda === "") return;
+
+                    // Validamos que la variable global 'map' de app.js exista
+                    if (typeof map === 'undefined') {
+                        console.error("El mapa aún no está listo.");
+                        return;
+                    }
+
+                    let encontrado = false;
+
+                    // Escaneamos todos los pines del mapa
+                    map.eachLayer(function(layer) {
+                        // Si es un pin y tiene ventana emergente (popup)
+                        if (layer instanceof L.Marker && layer.getPopup()) {
+                            const contenidoPopup = layer.getPopup().getContent();
+                            
+                            // Si el texto del popup incluye lo que escribió el usuario
+                            if (contenidoPopup && contenidoPopup.toLowerCase().includes(textoBusqueda)) {
+                                // Vuela al punto con animación suave
+                                map.flyTo(layer.getLatLng(), 15, {
+                                    animate: true,
+                                    duration: 1.5
+                                });
+                                layer.openPopup();
+                                encontrado = true;
+                            }
+                        }
+                    });
+
+                    if (!encontrado) {
+                        alert("No encontramos ningún centro con ese nombre. Intenta con una sola palabra clave (Ej: Cesfam, Integramedica).");
+                    }
+                }
+
+                if (btnBuscar) btnBuscar.addEventListener('click', buscarEnMapa);
+                if (inputBuscar) {
+                    inputBuscar.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') buscarEnMapa();
+                    });
+                }
+            }, 1500);
+        });
+    </script>
 </body>
 </html>
