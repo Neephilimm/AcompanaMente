@@ -11,62 +11,41 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* TU PALETA DE COLORES EXACTA */
         :root {
-            --color-primario: #315937;    /* Verde oscuro */
-            --color-secundario: #56735D;  /* Verde medio */
-            --color-acento: #6D8C72;      /* Verde suave */
-            --color-interfaz: #94A696;    /* Verde grisáceo */
-            --fondo-sitio: #F2F2F2;       /* Fondo general */
-            --color-alerta: #E74C3C;      /* Rojo emergencia */
+            --color-primario: #315937;    
+            --color-secundario: #56735D;  
+            --color-acento: #6D8C72;      
+            --color-interfaz: #94A696;    
+            --fondo-sitio: #F2F2F2;       
+            --color-alerta: #E74C3C;      
             --texto-principal: #333333;   
         }
 
-        /* Estilos Generales */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--fondo-sitio); color: var(--texto-principal); overflow-x: hidden; }
         header { background-color: var(--color-primario); color: white; text-align: center; padding: 20px 10px; }
         header a { text-decoration: none; color: inherit; display: block; }
         header p { font-size: 1.1em; margin-top: 5px; color: #F2F2F2; opacity: 0.9; }
 
-        /* Estructura del Menú Navegable */
         .tab-menu { display: flex; justify-content: center; background-color: var(--color-primario); padding: 10px 0; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); flex-wrap: wrap; }
         .tab-btn { background-color: transparent; color: white; border: none; padding: 12px 24px; margin: 0 5px; font-size: 1.1em; cursor: pointer; border-radius: 5px; transition: all 0.3s; font-weight: bold; }
         .tab-btn:hover { background-color: var(--color-interfaz); color: white; }
         .tab-btn.active { background-color: var(--color-secundario); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         
-        /* TRUCO CSS PARA EVITAR EL BUG DEL MAPA */
-        .tab-content { 
-            position: absolute; 
-            left: -9999px; 
-            top: -9999px; 
-            visibility: hidden; 
-            opacity: 0; 
-            width: 100%;
-            transition: opacity 0.4s ease;
-        }
-        .tab-content.active { 
-            position: relative; 
-            left: 0; 
-            top: 0; 
-            visibility: visible; 
-            opacity: 1; 
-        }
+        /* Ocultar pestañas de forma segura para no romper el mapa */
+        .tab-content { position: absolute; left: -9999px; top: -9999px; visibility: hidden; opacity: 0; width: 100%; transition: opacity 0.3s; }
+        .tab-content.active { position: relative; left: 0; top: 0; visibility: visible; opacity: 1; }
 
-        /* Contenedores Principales */
         .container { display: flex; flex-wrap: wrap; max-width: 1200px; margin: 20px auto; gap: 20px; padding: 0 15px; }
         .map-section, .ai-section { flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         h2 { color: var(--color-primario); margin-bottom: 15px; font-size: 1.5em; border-bottom: 2px solid var(--color-secundario); padding-bottom: 5px; }
         
-        /* Cajas de Instrucciones */
         .info-box { background-color: rgba(148, 166, 150, 0.15); border-left: 4px solid var(--color-secundario); padding: 12px 15px; margin-bottom: 20px; border-radius: 4px; font-size: 0.95em; color: var(--color-primario); line-height: 1.5; font-weight: 500; }
         
-        /* Botones e Inicialización de Mapa */
         .primary-btn { background-color: var(--color-secundario); color: white; border: none; padding: 10px 15px; font-size: 1em; border-radius: 5px; cursor: pointer; margin-bottom: 15px; width: 100%; transition: background-color 0.3s; font-weight: bold; }
         .primary-btn:hover { background-color: var(--color-primario); }
         #map { height: 400px; border-radius: 8px; border: 1px solid #ddd; z-index: 1; }
 
-        /* Cuadro de Diálogo del Chatbot */
         .chat-box { height: 340px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; padding: 15px; background-color: white; display: flex; flex-direction: column; margin-bottom: 15px; }
         .ai-msg { background-color: rgba(148, 166, 150, 0.2); color: var(--color-primario); padding: 12px 18px; border-radius: 10px; margin: 10px 0; max-width: 85%; align-self: flex-start; white-space: pre-line; line-height: 1.5; border-left: 4px solid var(--color-secundario); font-weight: 500; }
         .user-msg { background-color: var(--color-secundario); color: white; padding: 12px 18px; border-radius: 10px; margin: 10px 0; max-width: 85%; align-self: flex-end; line-height: 1.5; }
@@ -75,17 +54,15 @@
         .input-area button { background-color: var(--color-acento); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold; transition: background-color 0.3s; }
         .input-area button:hover { background-color: var(--color-secundario); }
 
-        /* Perfil de Equipo Académico */
         .equipo-card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto; }
         .integrantes-lista { font-size: 1.1em; line-height: 1.8; color: var(--color-primario); margin-top: 15px; padding-left: 20px; font-weight: 500; }
         
-        /* Enlaces de emergencia */
         .enlace-emergencia { text-decoration: none; color: inherit; display: block; transition: transform 0.2s; }
         .enlace-emergencia:hover { transform: translateY(-3px); }
         .emergencia-card { background: #fff; padding: 15px 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--color-alerta); }
         .emergencia-card-verde { background: #fff; padding: 15px 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--color-secundario); }
         
-        /* Videos */
+        /* Controles Personalizados de Videos */
         .video-container { max-width: 750px; margin: 0 auto 30px auto; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 10px; overflow: hidden; background-color: #000; }
         .video-container video { display: block; width: 100%; }
 
@@ -95,6 +72,10 @@
         .drive-video-card p { font-size: 0.95em; color: #555; line-height: 1.5; margin-bottom: 15px; flex-grow: 1; }
         .drive-iframe-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; background-color: #000; }
         .drive-iframe-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        
+        /* BOTÓN DE PANTALLA COMPLETA PERSONALIZADO */
+        .fullscreen-btn { background-color: var(--color-acento); color: white; border: none; padding: 10px; margin-top: 15px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; }
+        .fullscreen-btn:hover { background-color: var(--color-primario); }
     </style>
 </head>
 <body>
@@ -118,35 +99,26 @@
             <h2 style="color: var(--color-primario); font-size: 2em; margin-bottom: 20px; border:none;">Bienvenido a AcompañaMente</h2>
             <p style="font-size: 1.2em; line-height: 1.6; color: #555; margin-bottom: 20px;">
                 Este proyecto nace con el propósito de democratizar el acceso a la información sobre salud mental a nivel local en la comuna de Providencia. 
-                Nuestra plataforma te permite explorar los centros de atención más cercanos a tu ubicación, comparar precios y calificaciones, 
-                todo guiado por un asistente de inteligencia artificial capacitado para brindarte contención emocional de primera línea.
+                Nuestra plataforma te permite explorar los centros de atención más cercanos a tu ubicación guiado por inteligencia artificial.
             </p>
 
             <hr style="border: 1px solid #ddd; margin: 30px 0; width: 50%; margin-left: auto; margin-right: auto;">
             
             <h3 style="color: var(--color-secundario); font-size: 1.5em; margin-bottom: 10px;">Conoce Nuestro Proyecto</h3>
-            <p style="font-size: 1.1em; color: #555; margin-bottom: 20px;">
-                Descubre cómo el equipo TDI estructuró esta plataforma tecnológica para democratizar el acceso a la salud mental.
-            </p>
-
             <div class="video-container">
                 <video controls preload="metadata">
                     <source src="https://i.imgur.com/GHizA5d.mp4" type="video/mp4">
-                    Tu navegador no soporta la reproducción de videos.
                 </video>
             </div>
 
             <hr style="border: 1px solid #ddd; margin: 40px 0;">
             <h3 style="color: var(--color-alerta); margin-bottom: 20px;">Líneas de Emergencia Nacional (24/7)</h3>
-            <p>Si tú o alguien que conoces está en crisis, la ayuda es gratuita y confidencial:</p>
-            
-            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
                 <a href="tel:6003607777" class="enlace-emergencia">
                     <div class="emergencia-card">
                         <b>Salud Responde</b><br><span style="font-size: 1.2em; color: var(--color-alerta); font-weight: bold;">600 360 77 77</span>
                     </div>
                 </a>
-                
                 <a href="tel:*4141" class="enlace-emergencia">
                     <div class="emergencia-card-verde">
                         <b>Prevención del Suicidio</b><br><span style="font-size: 1.2em; color: var(--color-secundario); font-weight: bold;">*4141</span>
@@ -162,16 +134,15 @@
                 <h2>Centros Cercanos en Providencia</h2>
                 <div class="info-box">
                     <b>📍 ¿Cómo usar el mapa?</b><br>
-                    1. Puedes presionar <b>"Buscar cerca de mi ubicación"</b> para ver distancias.<br>
-                    2. O puedes escribir el nombre de un centro para encontrarlo directamente en el mapa.
+                    1. Presiona <b>"Buscar cerca de mi ubicación"</b> para ver distancias.<br>
+                    2. O puedes escribir el nombre de un centro recomendado por el asistente para encontrarlo.
                 </div>
                 
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
                     <button id="btn-ubicar" class="primary-btn" style="margin-bottom: 0;">📍 Buscar cerca de mi ubicación</button>
-                    
                     <div style="display: flex; gap: 10px;">
-                        <input type="text" id="buscador-centro" placeholder="🔍 Buscar centro por nombre..." style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; font-family: inherit;">
-                        <button id="btn-buscar-centro" style="background-color: var(--color-primario); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold; transition: 0.3s;">Buscar</button>
+                        <input type="text" id="buscador-centro" placeholder="🔍 Buscar centro (ej: Cesfam)..." style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em;">
+                        <button id="btn-buscar-centro" style="background-color: var(--color-primario); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">Buscar</button>
                     </div>
                 </div>
 
@@ -180,11 +151,7 @@
 
             <section class="ai-section">
                 <h2>Asistente de Orientación</h2>
-                <div class="info-box">
-                    <b>💬 ¿Cómo hablar con el Asistente?</b><br>
-                    Pídele recomendaciones (ej. <i>"¿Cuál es el centro más económico?"</i>), solicita contención emocional, o pide que genere un <b>gráfico visual</b> de tus emociones.
-                </div>
-                <div id="chat-box" class="chat-box">
+                <div class="chat-box" id="chat-box">
                     <p class="ai-msg">Hola, estoy aquí para escucharte y orientarte. ¿En qué te puedo ayudar hoy?</p>
                 </div>
                 <div class="input-area">
@@ -198,28 +165,24 @@
     <div id="tab-videos" class="tab-content">
         <div style="max-width: 900px; margin: 40px auto; text-align: center;">
             <h2 style="color: var(--color-primario); border:none;">Cápsulas y Entrevistas</h2>
-            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; text-align: left; border-left: 4px solid var(--color-acento);">
-                <h3 style="color: var(--color-primario); margin-bottom: 10px;">Trabajo de Campo</h3>
-                <p style="font-size: 1.1em; color: #555; line-height: 1.6;">
-                    En AcompañaMente sabemos que el desarrollo de una herramienta tecnológica debe estar conectado con las necesidades reales de la comunidad. En esta sección te compartimos nuestro proceso de validación en terreno: desde explorar la percepción sobre la salud mental hasta poner a prueba nuestra aplicación directamente con los usuarios.
-                </p>
-            </div>
             
             <div class="drive-video-grid">
                 <div class="drive-video-card">
-                    <h4>Video 1: La Necesidad de Apoyo Estudiantil</h4>
+                    <h4>Video 1: La Necesidad de Apoyo</h4>
                     <p>En este primer video, salimos a conversar con los estudiantes para conocer su perspectiva sobre la salud mental y les preguntamos si sienten que hace falta una aplicación enfocada en apoyarlos.</p>
-                    <div class="drive-iframe-wrapper">
-                        <iframe src="https://drive.google.com/file/d/1MELaAPXk2IcHJedqd8dH8pSQlsLwvFVb/preview" allow="autoplay; fullscreen" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+                    <div class="drive-iframe-wrapper" id="video-wrapper-1">
+                        <iframe src="https://drive.google.com/file/d/1MELaAPXk2IcHJedqd8dH8pSQlsLwvFVb/preview" allow="autoplay; fullscreen"></iframe>
                     </div>
+                    <button class="fullscreen-btn" onclick="forzarFullscreen('video-wrapper-1')">⛶ Ver en Pantalla Completa</button>
                 </div>
                 
                 <div class="drive-video-card">
-                    <h4>Video 2: Prueba y Evaluación de la App</h4>
-                    <p>En nuestra segunda cápsula, invitamos a los usuarios a probar la plataforma en tiempo real. Les consultamos si la interfaz resultó intuitiva, recogimos sus recomendaciones y les pedimos evaluar la experiencia.</p>
-                    <div class="drive-iframe-wrapper">
-                        <iframe src="https://drive.google.com/file/d/1pJetIiR27vnlrMUR3GNFOng0xMnT8me5/preview" allow="autoplay; fullscreen" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+                    <h4>Video 2: Prueba y Evaluación</h4>
+                    <p>Invitamos a los usuarios a probar la plataforma en tiempo real. Les consultamos si la interfaz resultó intuitiva y les pedimos evaluar la experiencia con una nota del 1 al 7.</p>
+                    <div class="drive-iframe-wrapper" id="video-wrapper-2">
+                        <iframe src="https://drive.google.com/file/d/1pJetIiR27vnlrMUR3GNFOng0xMnT8me5/preview" allow="autoplay; fullscreen"></iframe>
                     </div>
+                    <button class="fullscreen-btn" onclick="forzarFullscreen('video-wrapper-2')">⛶ Ver en Pantalla Completa</button>
                 </div>
             </div>
         </div>
@@ -230,7 +193,6 @@
             <h2 style="color: var(--color-primario); border-bottom: 2px solid var(--color-secundario); padding-bottom: 10px;">Quiénes Somos</h2>
             <p style="font-size: 1.1em; color: #555;">
                 Somos un equipo de estudiantes de la <b>Universidad Autónoma de Chile</b>, de la sede en <b>Santiago de Chile</b>. 
-                Hemos desarrollado este proyecto tecnológico con el objetivo de facilitar el acceso a la atención psicológica y brindar un apoyo inicial a nuestra comunidad.
             </p>
             <h3 style="color: var(--color-secundario); margin-top: 30px;">Nuestro Equipo (TDI)</h3>
             <ul class="integrantes-lista">
@@ -240,10 +202,6 @@
                 <li>Mateo Segovia</li>
                 <li>Pablo Alarcón</li>
             </ul>
-            <h3 style="color: var(--color-secundario); margin-top: 30px;">Contacto</h3>
-            <p style="font-size: 1.1em; margin: 5px 0;">📧 <b>Email:</b> <a href="mailto:tdimediocontacto@gmail.com" style="color: var(--color-primario);">tdimediocontacto@gmail.com</a></p>
-            <p style="font-size: 1.1em; margin: 5px 0;">📞 <b>Teléfono / WhatsApp:</b> +56 9 6321 1443</p>
-            <p style="font-size: 1.1em; margin: 5px 0;">📷 <b>Instagram:</b> <a href="https://instagram.com/tdi.cl" target="_blank" style="color: var(--color-acento);">@tdi.cl</a></p>
         </div>
     </div>
 
@@ -251,64 +209,30 @@
     <script src="app.js"></script>
     
     <script>
-        // ==========================================
-        // SISTEMA DE PESTAÑAS (VERSIÓN LIMPIA)
-        // ==========================================
+        // FUNCIÓN DE PESTAÑAS (Limpia)
         function abrirPestana(evt, nombrePestana) {
-            // Eliminar la clase activa de todos los botones y contenidos
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            
-            // Agregar la clase activa a la pestaña y botón seleccionados
             document.getElementById(nombrePestana).classList.add('active');
             evt.currentTarget.classList.add('active');
+
+            // Reparación del mapa invisible
+            if (nombrePestana === 'tab-mapa' && window.miMapaGlobal) {
+                setTimeout(() => window.miMapaGlobal.invalidateSize(), 100);
+            }
         }
 
-        // ==========================================
-        // BUSCADOR EN EL MAPA
-        // ==========================================
-        document.addEventListener("DOMContentLoaded", function() {
-            setTimeout(() => {
-                const btnBuscar = document.getElementById('btn-buscar-centro');
-                const inputBuscar = document.getElementById('buscador-centro');
-
-                function buscarEnMapa() {
-                    const textoBusqueda = inputBuscar.value.toLowerCase().trim();
-                    if (textoBusqueda === "") return;
-
-                    // Verificar si map existe globalmente
-                    if (typeof map === 'undefined') {
-                        console.error("No se pudo conectar con el mapa de app.js");
-                        return;
-                    }
-
-                    let encontrado = false;
-
-                    map.eachLayer(function(layer) {
-                        if (layer instanceof L.Marker && layer.getPopup()) {
-                            const contenidoPopup = layer.getPopup().getContent();
-                            
-                            if (contenidoPopup && contenidoPopup.toLowerCase().includes(textoBusqueda)) {
-                                map.flyTo(layer.getLatLng(), 15, { animate: true, duration: 1.5 });
-                                layer.openPopup();
-                                encontrado = true;
-                            }
-                        }
-                    });
-
-                    if (!encontrado) {
-                        alert("No encontramos ese centro. Intenta buscar por una sola palabra (ej: Providencia, Cesfam).");
-                    }
-                }
-
-                if (btnBuscar) btnBuscar.addEventListener('click', buscarEnMapa);
-                if (inputBuscar) {
-                    inputBuscar.addEventListener('keypress', function(e) {
-                        if (e.key === 'Enter') buscarEnMapa();
-                    });
-                }
-            }, 1500);
-        });
+        // FUNCIÓN PARA FORZAR PANTALLA COMPLETA EN VIDEOS DE DRIVE
+        function forzarFullscreen(idElemento) {
+            var elem = document.getElementById(idElemento);
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* Internet Explorer */
+                elem.msRequestFullscreen();
+            }
+        }
     </script>
 </body>
 </html>
