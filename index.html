@@ -243,6 +243,34 @@
     <script src="app.js"></script>
     
     <script>
+        // ==========================================
+        // SISTEMA DE PESTAÑAS (NAVEGACIÓN)
+        // ==========================================
+        function abrirPestana(evt, nombrePestana) {
+            var i, tabcontent, tablinks;
+            
+            // Ocultar todo el contenido
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+                tabcontent[i].classList.remove("active");
+            }
+            
+            // Quitar la clase 'active' de todos los botones
+            tablinks = document.getElementsByClassName("tab-btn");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            
+            // Mostrar la pestaña seleccionada y marcar el botón como activo
+            document.getElementById(nombrePestana).style.display = "block";
+            document.getElementById(nombrePestana).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        // ==========================================
+        // BUSCADOR EN EL MAPA
+        // ==========================================
         document.addEventListener("DOMContentLoaded", function() {
             // Le damos 1.5 segundos de ventaja a app.js para que descargue los centros desde Google Sheets
             setTimeout(() => {
