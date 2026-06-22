@@ -1,29 +1,62 @@
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Inicializar el mapa y centrarlo en Providencia
-    var map = L.map('map').setView([-33.4328, -70.6150], 14);
+    // ==========================================
+    // 1. INICIALIZACIÓN DEL MAPA
+    // ==========================================
+    var map = L.map('map').setView([-33.4328, -70.6150], 14); // Centrado en Providencia
+    window.miMapaGlobal = map; // Fundamental para que el buscador del HTML funcione
 
-    // 2. Cargar el diseño visual del mapa (OpenStreetMap)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    // 3. Crear un grupo para guardar los marcadores
     var centrosLayer = L.layerGroup().addTo(map);
 
-    // Marcadores de prueba (Aquí luego conectas tu Google Sheets de la arquitectura)
-    var marcadoresPrueba = [
-        { lat: -33.435, lng: -70.618, info: "<b>Cesfam Alfonso Leng</b><br>Atención primaria." },
-        { lat: -33.428, lng: -70.605, info: "<b>Integramedica Providencia</b><br>Centro de atención privado." }
-    ];
+    // ==========================================
+    // 2. CONEXIÓN A GOOGLE SHEETS (BASE DE DATOS)
+    // ==========================================
+    // PON AQUÍ TU ENLACE DE GOOGLE APPS SCRIPT
+    const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbzw-Ojl3VhtKLOsZwJUE7WWT-xzNPU5b5WDtQskBgEzg1y1vw2H8ez5b6gOpCxlowow/exec"; 
 
-    // Dibujamos los pines en el mapa
-    marcadoresPrueba.forEach(function(centro) {
-        var marker = L.marker([centro.lat, centro.lng]).bindPopup(centro.info);
-        centrosLayer.addLayer(marker);
-    });
+    async function cargarCentros() {
+        try {
+            // Hacemos la petición a tu script para traer los datos de Sheets
+            const respuesta = await fetch(URL_APPS_SCRIPT + "?action=getCentros"); 
+            const centros = await respuesta.json();
 
-    // 4. GPS: Buscar mi ubicación
+            centros.forEach(centro => {
+                // Aquí usamos los nombres EXACTOS de las columnas de tu Google Sheet
+                if(centro.Latitud && centro.Longitud) {
+                    let infoHTML = `
+                        <div style="font-family: Arial; font-size: 14px;">
+                            <h3 style="color: #315937; margin-bottom: 5px;">${centro.Nombre}</h3>
+                            <b>📍 Dirección:</b> ${centro.Ubicación}<br>
+                            <b>💰 Valor:</b> ${centro.Valor_Individual}<br>
+                            <b>📞 Contacto:</b> ${centro.Contacto}<br>
+                            <b>⭐ Calificación:</b> ${centro.Calificacion}/5
+                        </div>
+                    `;
+                    
+                    var marker = L.marker([parseFloat(centro.Latitud), parseFloat(centro.Longitud)])
+                                  .bindPopup(infoHTML);
+                    centrosLayer.addLayer(marker);
+                }
+            });
+        } catch (error) {
+            console.error("Error al cargar los datos de Google Sheets:", error);
+        }
+    }
+    
+    // Si tienes tu URL puesta, esto cargará los pines automáticamente
+    if (URL_APPS_SCRIPT !== "PEGA_TU_URL_AQUI") {
+        cargarCentros();
+    } else {
+        console.warn("Falta agregar la URL de Google Apps Script para cargar los centros.");
+    }
+
+    // ==========================================
+    // 3. BOTÓN DE UBICACIÓN GPS
+    // ==========================================
     const btnUbicar = document.getElementById('btn-ubicar');
     if (btnUbicar) {
         btnUbicar.addEventListener('click', function() {
@@ -38,39 +71,63 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     map.on('locationerror', function(e) {
-        alert("No pudimos obtener tu ubicación. Por favor, activa el GPS o dale permisos a tu navegador.");
+        alert("No pudimos obtener tu ubicación. Revisa si le diste permiso al navegador.");
     });
 
-    // 5. Buscador de centros por texto
-    const btnBuscar = document.getElementById('btn-buscar-centro');
-    const inputBuscar = document.getElementById('buscador-centro');
+    // ==========================================
+    // 4. CONEXIÓN CON EL CHATBOT (Llama 3.3 vía Groq)
+    // ==========================================
+    const btnEnviar = document.getElementById('btn-enviar');
+    const inputChat = document.getElementById('user-input');
+    const chatBox = document.getElementById('chat-box');
 
-    function buscarCentro() {
-        const texto = inputBuscar.value.toLowerCase().trim();
-        if (!texto) return;
+    async function enviarMensaje() {
+        const mensaje = inputChat.value.trim();
+        if (!mensaje) return;
 
-        let encontrado = false;
-        centrosLayer.eachLayer(function(layer) {
-            if (layer.getPopup()) {
-                const contenido = layer.getPopup().getContent().toLowerCase();
-                if (contenido.includes(texto)) {
-                    map.flyTo(layer.getLatLng(), 15, { animate: true, duration: 1.5 });
-                    layer.openPopup();
-                    encontrado = true;
-                }
-            }
-        });
+        if (URL_APPS_SCRIPT === "PEGA_TU_URL_AQUI") {
+            alert("Falta configurar la URL de Apps Script para usar el chatbot.");
+            return;
+        }
 
-        if (!encontrado) alert("No encontramos ese centro. Intenta buscar por una sola palabra (ej: Cesfam).");
+        // 1. Mostrar el mensaje del usuario en pantalla
+        chatBox.innerHTML += `<p class="user-msg">${mensaje}</p>`;
+        inputChat.value = '';
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // 2. Mostrar indicador de "Escribiendo..."
+        const idEscribiendo = "typing-" + Date.now();
+        chatBox.innerHTML += `<p class="ai-msg" id="${idEscribiendo}"><i>La IA está analizando tu respuesta...</i></p>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        try {
+            // 3. Enviar el mensaje a tu Apps Script (que se conecta con Groq)
+            const peticion = await fetch(URL_APPS_SCRIPT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' }, 
+                body: JSON.stringify({ accion: "chat", mensaje: mensaje })
+            });
+            
+            const data = await peticion.json();
+            
+            // 4. Borrar "Escribiendo..."
+            document.getElementById(idEscribiendo).remove();
+
+            // 5. Mostrar la respuesta de la Inteligencia Artificial
+            chatBox.innerHTML += `<p class="ai-msg">${data.respuesta}</p>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+        } catch (error) {
+            document.getElementById(idEscribiendo).remove();
+            chatBox.innerHTML += `<p class="ai-msg" style="color:#E74C3C;"><b>Error de conexión:</b> No pudimos comunicarnos con el servidor de IA en este momento.</p>`;
+            console.error(error);
+        }
     }
 
-    if (btnBuscar) btnBuscar.addEventListener('click', buscarCentro);
-    if (inputBuscar) {
-        inputBuscar.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') buscarCentro();
+    if (btnEnviar) btnEnviar.addEventListener('click', enviarMensaje);
+    if (inputChat) {
+        inputChat.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') enviarMensaje();
         });
     }
-
-    // FIX: Hacemos que el mapa sea global para que las pestañas del HTML lo reconozcan
-    window.miMapaGlobal = map;
 });
