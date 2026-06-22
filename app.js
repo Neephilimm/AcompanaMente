@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var centrosLayer = L.layerGroup().addTo(map);
 
     const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbzw-Ojl3VhtKLOsZwJUE7WWT-xzNPU5b5WDtQskBgEzg1y1vw2H8ez5b6gOpCxlowow/exec"; 
-    let listaCentrosData = []; // Guardará los datos en memoria antes de dibujarlos
+    let listaCentrosData = []; 
 
     // ==========================================
     // 2. CREACIÓN DE LISTA DE BÚSQUEDA (AUTOCOMPLETADO)
@@ -24,7 +24,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const inputBuscar = document.getElementById('buscador-centro');
     if (inputBuscar) inputBuscar.setAttribute('list', 'lista-centros-dinamica');
 
-    // Descarga los datos de Sheets al cargar la página para el buscador, pero NO los dibuja aún
     async function preCargarDatos() {
         try {
             const respuesta = await fetch(URL_APPS_SCRIPT + "?action=getCentros"); 
@@ -48,7 +47,6 @@ document.addEventListener("DOMContentLoaded", function() {
     // 3. FUNCIÓN PARA DIBUJAR LOS CENTROS (AL CLICAR)
     // ==========================================
     function dibujarCentrosEnMapa() {
-        // Si ya están dibujados, no los duplica
         if (Object.keys(window.marcadoresCentros).length > 0) return;
 
         listaCentrosData.forEach(centro => {
@@ -56,7 +54,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 let lat = parseFloat(centro.Latitud);
                 let lng = parseFloat(centro.Longitud);
                 
-                // Diseño de la tarjeta con teléfono clicable y botón de ruta a Google Maps
                 let infoHTML = `
                     <div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; line-height: 1.5; min-width: 200px;">
                         <h3 style="color: #315937; margin-bottom: 6px; font-size: 16px;">${centro.Nombre}</h3>
@@ -75,7 +72,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 var marker = L.marker([lat, lng]).bindPopup(infoHTML);
                 centrosLayer.addLayer(marker);
 
-                // Guardamos en memoria para el buscador
                 window.marcadoresCentros[centro.Nombre] = marker;
             }
         });
@@ -87,7 +83,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const btnBuscar = document.getElementById('btn-buscar-centro');
 
     function volarAlCentro() {
-        // Si el usuario busca un centro sin haber apretado el botón de GPS, los dibujamos automáticamente
         dibujarCentrosEnMapa();
 
         const nombreSeleccionado = inputBuscar.value;
@@ -110,22 +105,19 @@ document.addEventListener("DOMContentLoaded", function() {
     const btnUbicar = document.getElementById('btn-ubicar');
     if (btnUbicar) {
         btnUbicar.addEventListener('click', function() {
-            // Al hacer clic, mostramos los centros de la base de datos
             dibujarCentrosEnMapa();
             map.locate({setView: true, maxZoom: 15});
         });
     }
 
     map.on('locationfound', function(e) {
-        // Guardar coordenadas para el chatbot
         window.userLat = e.latlng.lat;
         window.userLng = e.latlng.lng;
 
-        // MARCADOR ESTILO PUNTO AZUL RADAR (Sutil y moderno)
         L.circleMarker(e.latlng, {
             radius: 8,
-            fillColor: '#007bef', // Azul GPS estándar
-            color: '#ffffff',    // Borde blanco
+            fillColor: '#007bef', 
+            color: '#ffffff',    
             weight: 3,
             opacity: 1,
             fillOpacity: 0.9
@@ -134,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     map.on('locationerror', function() {
         alert("No se pudo obtener tu ubicación. Mostrando los centros disponibles en la comuna.");
-        dibujarCentrosEnMapa(); // Si falla el GPS, igual le mostramos los centros para no dejar el mapa vacío
+        dibujarCentrosEnMapa(); 
     });
 
     // ==========================================
@@ -153,7 +145,8 @@ document.addEventListener("DOMContentLoaded", function() {
         chatBox.scrollTop = chatBox.scrollHeight;
 
         const idEscribiendo = "typing-" + Date.now();
-        chatBox.innerHTML += `<p class="ai-msg" id="${idEscribiendo}"><i>La IA está analizando tu consulta...</i></p>`;
+        // ESTA ES LA LÍNEA MODIFICADA CON EL TEXTO PROFESIONAL
+        chatBox.innerHTML += `<p class="ai-msg" id="${idEscribiendo}"><i>AcompañaMente está escribiendo...</i></p>`;
         chatBox.scrollTop = chatBox.scrollHeight;
 
         try {
