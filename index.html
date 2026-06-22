@@ -13,38 +13,52 @@
     <style>
         /* TU PALETA DE COLORES EXACTA */
         :root {
-            --color-primario: #315937;    /* Verde oscuro: Cabeceras y textos clave */
-            --color-secundario: #56735D;  /* Verde medio: Botones y pestañas activas */
-            --color-acento: #6D8C72;      /* Verde suave: Botón de enviar chat y detalles */
-            --color-interfaz: #94A696;    /* Verde grisáceo: Hover y fondos de mensajes IA */
-            --fondo-sitio: #F2F2F2;       /* Tu color claro para el fondo general */
-            
-            --color-alerta: #E74C3C;      /* Rojo mantenido SOLO para el estándar de emergencia médica */
+            --color-primario: #315937;    /* Verde oscuro */
+            --color-secundario: #56735D;  /* Verde medio */
+            --color-acento: #6D8C72;      /* Verde suave */
+            --color-interfaz: #94A696;    /* Verde grisáceo */
+            --fondo-sitio: #F2F2F2;       /* Fondo general */
+            --color-alerta: #E74C3C;      /* Rojo emergencia */
             --texto-principal: #333333;   
         }
 
-        /* Estilos Generales de la Interfaz */
+        /* Estilos Generales */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--fondo-sitio); color: var(--texto-principal); }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--fondo-sitio); color: var(--texto-principal); overflow-x: hidden; }
         header { background-color: var(--color-primario); color: white; text-align: center; padding: 20px 10px; }
         header a { text-decoration: none; color: inherit; display: block; }
         header p { font-size: 1.1em; margin-top: 5px; color: #F2F2F2; opacity: 0.9; }
 
-        /* Estructura del Menú Navegable (Pestañas) */
+        /* Estructura del Menú Navegable */
         .tab-menu { display: flex; justify-content: center; background-color: var(--color-primario); padding: 10px 0; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); flex-wrap: wrap; }
         .tab-btn { background-color: transparent; color: white; border: none; padding: 12px 24px; margin: 0 5px; font-size: 1.1em; cursor: pointer; border-radius: 5px; transition: all 0.3s; font-weight: bold; }
         .tab-btn:hover { background-color: var(--color-interfaz); color: white; }
         .tab-btn.active { background-color: var(--color-secundario); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .tab-content { display: none; animation: fadeIn 0.4s; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* TRUCO CSS PARA EVITAR EL BUG DEL MAPA */
+        .tab-content { 
+            position: absolute; 
+            left: -9999px; 
+            top: -9999px; 
+            visibility: hidden; 
+            opacity: 0; 
+            width: 100%;
+            transition: opacity 0.4s ease;
+        }
+        .tab-content.active { 
+            position: relative; 
+            left: 0; 
+            top: 0; 
+            visibility: visible; 
+            opacity: 1; 
+        }
 
         /* Contenedores Principales */
         .container { display: flex; flex-wrap: wrap; max-width: 1200px; margin: 20px auto; gap: 20px; padding: 0 15px; }
         .map-section, .ai-section { flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         h2 { color: var(--color-primario); margin-bottom: 15px; font-size: 1.5em; border-bottom: 2px solid var(--color-secundario); padding-bottom: 5px; }
         
-        /* Cajas de Instrucciones para Usuarios */
+        /* Cajas de Instrucciones */
         .info-box { background-color: rgba(148, 166, 150, 0.15); border-left: 4px solid var(--color-secundario); padding: 12px 15px; margin-bottom: 20px; border-radius: 4px; font-size: 0.95em; color: var(--color-primario); line-height: 1.5; font-weight: 500; }
         
         /* Botones e Inicialización de Mapa */
@@ -61,21 +75,20 @@
         .input-area button { background-color: var(--color-acento); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold; transition: background-color 0.3s; }
         .input-area button:hover { background-color: var(--color-secundario); }
 
-        /* Perfil de Equipo Académico y Cajas Informativas */
+        /* Perfil de Equipo Académico */
         .equipo-card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto; }
         .integrantes-lista { font-size: 1.1em; line-height: 1.8; color: var(--color-primario); margin-top: 15px; padding-left: 20px; font-weight: 500; }
         
-        /* Enlaces de emergencia interactivos (Hover) */
+        /* Enlaces de emergencia */
         .enlace-emergencia { text-decoration: none; color: inherit; display: block; transition: transform 0.2s; }
         .enlace-emergencia:hover { transform: translateY(-3px); }
         .emergencia-card { background: #fff; padding: 15px 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--color-alerta); }
         .emergencia-card-verde { background: #fff; padding: 15px 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--color-secundario); }
         
-        /* Contenedor del Video de Presentación (Portada) */
+        /* Videos */
         .video-container { max-width: 750px; margin: 0 auto 30px auto; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 10px; overflow: hidden; background-color: #000; }
         .video-container video { display: block; width: 100%; }
 
-        /* Estilos para la galería de videos de Google Drive (Pestaña Videos) */
         .drive-video-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 30px; }
         .drive-video-card { flex: 1; min-width: 300px; max-width: 420px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-top: 4px solid var(--color-secundario); display: flex; flex-direction: column; }
         .drive-video-card h4 { color: var(--color-primario); font-size: 1.2em; margin-bottom: 8px; }
@@ -150,14 +163,14 @@
                 <div class="info-box">
                     <b>📍 ¿Cómo usar el mapa?</b><br>
                     1. Puedes presionar <b>"Buscar cerca de mi ubicación"</b> para ver distancias.<br>
-                    2. O puedes escribir el nombre de un centro recomendado por el asistente para encontrarlo directamente en el mapa.
+                    2. O puedes escribir el nombre de un centro para encontrarlo directamente en el mapa.
                 </div>
                 
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
                     <button id="btn-ubicar" class="primary-btn" style="margin-bottom: 0;">📍 Buscar cerca de mi ubicación</button>
                     
                     <div style="display: flex; gap: 10px;">
-                        <input type="text" id="buscador-centro" placeholder="🔍 Buscar centro por nombre (ej: Cesfam)..." style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; font-family: inherit;">
+                        <input type="text" id="buscador-centro" placeholder="🔍 Buscar centro por nombre..." style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; font-family: inherit;">
                         <button id="btn-buscar-centro" style="background-color: var(--color-primario); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold; transition: 0.3s;">Buscar</button>
                     </div>
                 </div>
@@ -169,7 +182,7 @@
                 <h2>Asistente de Orientación</h2>
                 <div class="info-box">
                     <b>💬 ¿Cómo hablar con el Asistente?</b><br>
-                    Pídele recomendaciones cruzando datos (ej. <i>"¿Cuál es el centro más económico?"</i>), solicita contención emocional, o pide que genere un <b>gráfico visual</b> de tus emociones. Todo es confidencial.
+                    Pídele recomendaciones (ej. <i>"¿Cuál es el centro más económico?"</i>), solicita contención emocional, o pide que genere un <b>gráfico visual</b> de tus emociones.
                 </div>
                 <div id="chat-box" class="chat-box">
                     <p class="ai-msg">Hola, estoy aquí para escucharte y orientarte. ¿En qué te puedo ayudar hoy?</p>
@@ -203,7 +216,7 @@
                 
                 <div class="drive-video-card">
                     <h4>Video 2: Prueba y Evaluación de la App</h4>
-                    <p>En nuestra segunda cápsula, invitamos a los usuarios a probar la plataforma en tiempo real. Les consultamos si la interfaz resultó intuitiva, recogimos sus recomendaciones y les pedimos evaluar la experiencia con una nota del 1 al 7.</p>
+                    <p>En nuestra segunda cápsula, invitamos a los usuarios a probar la plataforma en tiempo real. Les consultamos si la interfaz resultó intuitiva, recogimos sus recomendaciones y les pedimos evaluar la experiencia.</p>
                     <div class="drive-iframe-wrapper">
                         <iframe src="https://drive.google.com/file/d/1pJetIiR27vnlrMUR3GNFOng0xMnT8me5/preview" allow="autoplay; fullscreen" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
                     </div>
@@ -231,11 +244,6 @@
             <p style="font-size: 1.1em; margin: 5px 0;">📧 <b>Email:</b> <a href="mailto:tdimediocontacto@gmail.com" style="color: var(--color-primario);">tdimediocontacto@gmail.com</a></p>
             <p style="font-size: 1.1em; margin: 5px 0;">📞 <b>Teléfono / WhatsApp:</b> +56 9 6321 1443</p>
             <p style="font-size: 1.1em; margin: 5px 0;">📷 <b>Instagram:</b> <a href="https://instagram.com/tdi.cl" target="_blank" style="color: var(--color-acento);">@tdi.cl</a></p>
-            <div style="margin-top: 30px; text-align: center;">
-                <a href="https://tdinoticias.github.io/web" target="_blank" style="display: inline-block; background: var(--color-secundario); color: white; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 5px; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                    Visita Nuestra Página Web Oficial
-                </a>
-            </div>
         </div>
     </div>
 
@@ -244,41 +252,16 @@
     
     <script>
         // ==========================================
-        // SISTEMA DE PESTAÑAS Y SOLUCIÓN DEL MAPA INVISIBLE
+        // SISTEMA DE PESTAÑAS (VERSIÓN LIMPIA)
         // ==========================================
         function abrirPestana(evt, nombrePestana) {
-            var i, tabcontent, tablinks;
+            // Eliminar la clase activa de todos los botones y contenidos
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             
-            // Ocultar todo el contenido
-            tabcontent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-                tabcontent[i].classList.remove("active");
-            }
-            
-            // Quitar la clase 'active' de todos los botones
-            tablinks = document.getElementsByClassName("tab-btn");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].classList.remove("active");
-            }
-            
-            // Mostrar la pestaña seleccionada
-            document.getElementById(nombrePestana).style.display = "block";
-            document.getElementById(nombrePestana).classList.add("active");
-            evt.currentTarget.classList.add("active");
-
-            // FIX: Forzar a Leaflet a recalcular su tamaño cuando se abre su pestaña
-            if (nombrePestana === 'tab-mapa') {
-                setTimeout(function() {
-                    // Disparamos un evento de cambio de tamaño en la ventana
-                    window.dispatchEvent(new Event('resize'));
-                    
-                    // Si la variable map es global, usamos su función oficial
-                    if (typeof map !== 'undefined' && map.invalidateSize) {
-                        map.invalidateSize();
-                    }
-                }, 200);
-            }
+            // Agregar la clase activa a la pestaña y botón seleccionados
+            document.getElementById(nombrePestana).classList.add('active');
+            evt.currentTarget.classList.add('active');
         }
 
         // ==========================================
@@ -293,8 +276,9 @@
                     const textoBusqueda = inputBuscar.value.toLowerCase().trim();
                     if (textoBusqueda === "") return;
 
+                    // Verificar si map existe globalmente
                     if (typeof map === 'undefined') {
-                        console.error("El mapa aún no está listo.");
+                        console.error("No se pudo conectar con el mapa de app.js");
                         return;
                     }
 
@@ -305,10 +289,7 @@
                             const contenidoPopup = layer.getPopup().getContent();
                             
                             if (contenidoPopup && contenidoPopup.toLowerCase().includes(textoBusqueda)) {
-                                map.flyTo(layer.getLatLng(), 15, {
-                                    animate: true,
-                                    duration: 1.5
-                                });
+                                map.flyTo(layer.getLatLng(), 15, { animate: true, duration: 1.5 });
                                 layer.openPopup();
                                 encontrado = true;
                             }
@@ -316,7 +297,7 @@
                     });
 
                     if (!encontrado) {
-                        alert("No encontramos ningún centro con ese nombre. Intenta con una sola palabra clave (Ej: Cesfam, Integramedica).");
+                        alert("No encontramos ese centro. Intenta buscar por una sola palabra (ej: Providencia, Cesfam).");
                     }
                 }
 
