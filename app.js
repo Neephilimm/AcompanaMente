@@ -7,8 +7,6 @@ document.addEventListener("DOMContentLoaded", function() {
     window.userLat = null; 
     window.userLng = null; 
     window.marcadoresCentros = {}; 
-    
-    // ESTA ES LA MEMORIA DEL CHATBOT
     window.historialChat = []; 
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
@@ -117,17 +115,28 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // ==========================================
-    // 6. CHATBOT (CON MEMORIA Y GRÁFICOS FLEXIBLES)
+    // 6. CHATBOT Y MENSAJE DE INTRODUCCIÓN
     // ==========================================
     const btnEnviar = document.getElementById('btn-enviar');
     const inputChat = document.getElementById('user-input');
     const chatBox = document.getElementById('chat-box');
 
+    // MUESTRA LA INTRODUCCIÓN AL CARGAR LA PÁGINA
+    chatBox.innerHTML = `
+        <div class="ai-msg" style="font-size: 14.5px;">
+            <b>👋 ¡Hola! Soy el asistente de AcompañaMente.</b><br><br>
+            Estoy aquí para escucharte y orientarte. Puedes usarme para:<br><br>
+            🗣️ <b>Conversar:</b> Cuéntame cómo te sientes si necesitas apoyo o desahogarte.<br>
+            🏥 <b>Buscar opciones:</b> Pídeme que te recomiende un centro cercano o económico.<br>
+            📊 <b>Graficar emociones:</b> Dime "tengo 8 de ansiedad y 5 de estrés, dibuja un gráfico" para visualizar tu estado.<br><br>
+            ¿En qué te puedo ayudar hoy?
+        </div>
+    `;
+
     async function enviarMensaje() {
         const mensaje = inputChat.value.trim();
         if (!mensaje) return;
 
-        // Guardamos lo que dice el usuario en la memoria
         window.historialChat.push({ "role": "user", "content": mensaje });
 
         chatBox.innerHTML += `<p class="user-msg">${mensaje}</p>`;
@@ -144,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 headers: { 'Content-Type': 'text/plain' }, 
                 body: JSON.stringify({ 
                     accion: "chat", 
-                    historial: window.historialChat, // Enviamos toda la conversación
+                    historial: window.historialChat,
                     lat: window.userLat,
                     lng: window.userLng
                 })
@@ -154,27 +163,23 @@ document.addEventListener("DOMContentLoaded", function() {
             document.getElementById(idEscribiendo).remove();
 
             let textoRespuesta = data.respuesta;
-            
-            // Guardamos la respuesta de la IA en la memoria
             window.historialChat.push({ "role": "assistant", "content": textoRespuesta });
 
             let chartHTML = "";
-
-            // DETECCIÓN A PRUEBA DE BALAS (Ignora tildes, espacios y puntos al final)
             const chartMatch = textoRespuesta.match(/\[GR[AÁ]FICO:(.*?)\]/i);
+            
             if (chartMatch) {
                 let chartDataStr = chartMatch[1]; 
-                textoRespuesta = textoRespuesta.replace(chartMatch[0], ''); // Ocultamos la etiqueta
+                textoRespuesta = textoRespuesta.replace(chartMatch[0], ''); 
                 
                 let labels = [];
                 let values = [];
                 
                 chartDataStr.split(',').forEach(par => {
-                    // Limpiamos los datos por si Groq puso espacios
                     let partes = par.split('=');
                     if(partes.length === 2) { 
                         let emocion = partes[0].trim();
-                        let valor = partes[1].replace(/[^0-9]/g, '').trim(); // Solo extrae números
+                        let valor = partes[1].replace(/[^0-9]/g, '').trim(); 
                         if(emocion && valor) {
                             labels.push(emocion); 
                             values.push(Number(valor)); 
@@ -212,7 +217,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             }
 
-            // Convertimos enlaces en botones
             let respuestaFormateada = textoRespuesta.replace(/(https?:\/\/[^\s]+)/g, '<br><a href="$1" target="_blank" style="display:inline-block; margin-top:10px; background:#56735D; color:white; padding:8px 12px; text-decoration:none; border-radius:5px; font-weight:bold;">📍 Ver Ruta en Google Maps</a>');
             
             chatBox.innerHTML += `<div class="ai-msg">${respuestaFormateada}${chartHTML}</div>`;
