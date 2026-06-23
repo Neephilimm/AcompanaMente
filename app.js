@@ -115,21 +115,30 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // ==========================================
-    // 6. CHATBOT Y MENSAJE DE INTRODUCCIÓN
+    // 6. CHATBOT Y MENSAJE DE INTRODUCCIÓN FUERA DEL CHAT
     // ==========================================
     const btnEnviar = document.getElementById('btn-enviar');
     const inputChat = document.getElementById('user-input');
     const chatBox = document.getElementById('chat-box');
 
-    // MUESTRA LA INTRODUCCIÓN AL CARGAR LA PÁGINA
+    // 6.1 CREAR LA CAJA DE INSTRUCCIONES FUERA DEL CHAT
+    const instruccionesCaja = document.createElement('div');
+    instruccionesCaja.innerHTML = `
+        <div style="background-color: #E8F5E9; border-left: 4px solid #315937; border-radius: 4px; padding: 12px; margin-bottom: 15px; font-size: 14px; color: #2E7D32; font-family: 'Segoe UI', Arial, sans-serif;">
+            <b>💡 ¿Cómo usar a tu Asistente?</b><br>
+            <span style="display: inline-block; margin-top: 5px;">🗣️ <b>Para conversar:</b> Cuéntale cómo te sientes si necesitas desahogarte.</span><br>
+            <span style="display: inline-block; margin-top: 3px;">🏥 <b>Para buscar ayuda:</b> Pídele directamente un centro (ej: "Recomiéndame un lugar económico").</span><br>
+            <span style="display: inline-block; margin-top: 3px;">📊 <b>Para graficar:</b> Dile tus emociones en números (ej: "Tengo 8 de ansiedad, dibuja un gráfico").</span>
+        </div>
+    `;
+    
+    // Insertar las instrucciones justo antes del contenedor del chat
+    chatBox.parentNode.insertBefore(instruccionesCaja, chatBox);
+
+    // 6.2 RESTAURAR EL SALUDO INICIAL DEL CHAT
     chatBox.innerHTML = `
-        <div class="ai-msg" style="font-size: 14.5px;">
-            <b>👋 ¡Hola! Soy el asistente de AcompañaMente.</b><br><br>
-            Estoy aquí para escucharte y orientarte. Puedes usarme para:<br><br>
-            🗣️ <b>Conversar:</b> Cuéntame cómo te sientes si necesitas apoyo o desahogarte.<br>
-            🏥 <b>Buscar opciones:</b> Pídeme que te recomiende un centro cercano o económico.<br>
-            📊 <b>Graficar emociones:</b> Dime "tengo 8 de ansiedad y 5 de estrés, dibuja un gráfico" para visualizar tu estado.<br><br>
-            ¿En qué te puedo ayudar hoy?
+        <div class="ai-msg">
+            Hola, estoy aquí para escucharte y orientarte. ¿En qué te puedo ayudar hoy?
         </div>
     `;
 
