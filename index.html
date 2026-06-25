@@ -49,6 +49,45 @@
             font-weight: 400;
         }
 
+        /* --- PANTALLA DE INGRESO CINEMATOGRÁFICA (SPLASH SCREEN) --- */
+        #splash-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, #014B43 0%, #00221A 100%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .splash-btn {
+            background: var(--color-white);
+            color: var(--color-green-dark);
+            border: none;
+            padding: 16px 35px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .splash-btn:hover {
+            transform: scale(1.05);
+            background: var(--color-teal);
+            color: white;
+            box-shadow: 0 15px 30px rgba(41, 134, 156, 0.4);
+        }
+
         /* --- HEADER --- */
         header {
             display: flex;
@@ -153,8 +192,6 @@
         /* ========================================================
            SISTEMA HOVER INMERSIVO CON SOMBRA Y PROTAGONISMO
            ======================================================== */
-           
-        /* La Sombra Oscura que cubre todo el fondo de la sección */
         .section-shadow {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -169,7 +206,6 @@
             opacity: 1;
         }
 
-        /* Contenedor que agrupa Tarjeta y Nodos en orden vertical */
         .timeline-hover-layout {
             display: flex;
             flex-direction: column;
@@ -180,7 +216,6 @@
             z-index: 10; 
         }
 
-        /* La Tarjeta Protagonista */
         .cinematic-card {
             background: white;
             border-radius: 20px;
@@ -213,7 +248,6 @@
         }
         .c-img-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-        /* Los Nodos Inferiores */
         .cinematic-nodes-wrapper {
             position: relative;
             display: flex;
@@ -228,7 +262,6 @@
             backdrop-filter: blur(10px);
         }
 
-        /* Línea horizontal detrás de los números */
         .c-line {
             position: absolute;
             top: 50%; left: 8%; right: 8%;
@@ -247,9 +280,7 @@
             cursor: pointer;
             transition: transform 0.3s ease;
         }
-        .c-node:hover {
-            transform: translateY(-8px);
-        }
+        .c-node:hover { transform: translateY(-8px); }
 
         .c-num {
             width: 60px; height: 60px;
@@ -276,9 +307,7 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.6);
             transition: color 0.3s;
         }
-        .c-node.active .c-label {
-            color: #a7f3d0; 
-        }
+        .c-node.active .c-label { color: #a7f3d0; }
 
         /* --- GRÁFICO --- */
         .chart-container {
@@ -310,7 +339,15 @@
 </head>
 <body>
 
-    <audio id="bg-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" autoplay loop></audio>
+    <div id="splash-screen">
+        <h1 style="font-size: 3rem; margin-bottom: 15px;">Especial TDI: Trasplantes en Chile</h1>
+        <p style="max-width: 600px; opacity: 0.8; text-align: center;">Este reportaje contiene elementos sonoros y visuales interactivos diseñados para una experiencia inmersiva completa.</p>
+        <button class="splash-btn" onclick="enterReportage()">
+            Ingresar al Reportaje <i class="fa-solid fa-play"></i>
+        </button>
+    </div>
+
+    <audio id="bg-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" loop></audio>
 
     <button class="music-control" onclick="toggleMusic()">
         <i id="music-icon" class="fa-solid fa-volume-xmark"></i>
@@ -442,22 +479,31 @@
     </section>
 
     <script>
-        /* --- MÚSICA AMBIENTAL DIRECTA AL ENTRAR (SIN DETECTORES DE ESPERA) --- */
+        /* --- MANEJO DE AUDIOS FLUIDO Y ESTABLE --- */
         const bgMusic = document.getElementById('bg-music');
         const mainAudio = document.getElementById('main-audio');
         const musicIcon = document.getElementById('music-icon');
         bgMusic.volume = 0.15; 
         let musicMuted = true;
 
-        // Ejecutar de forma inmediata al cargar el script en la entrada del usuario
-        bgMusic.play().then(() => {
-            musicMuted = false;
-            musicIcon.className = "fa-solid fa-volume-high";
-        }).catch(() => {
-            console.log("Autoplay nativo bloqueado por restricciones de seguridad del navegador.");
-        });
+        // Función gatillada al presionar el botón de ingreso
+        function enterReportage() {
+            const splash = document.getElementById('splash-screen');
+            splash.style.opacity = '0';
+            splash.style.transform = 'scale(1.05)';
+            
+            // Forzar el inicio de la música al hacer el clic de entrada (Acción válida para el navegador)
+            bgMusic.play().then(() => {
+                musicMuted = false;
+                musicIcon.className = "fa-solid fa-volume-high";
+            }).catch(e => console.log("Error al reproducir audio:", e));
 
-        // Botón Manual
+            setTimeout(() => {
+                splash.style.display = 'none';
+            }, 800);
+        }
+
+        // Botón Manual de control flotante
         function toggleMusic() {
             if (bgMusic.paused) {
                 bgMusic.play(); musicIcon.className = "fa-solid fa-volume-high"; musicMuted = false;
@@ -466,7 +512,7 @@
             }
         }
 
-        // Lógica de interrupción para la sección de testimonios
+        // Lógica de interrupción por scroll en el testimonio
         const audioSection = document.getElementById('audio-section');
         const audioObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
