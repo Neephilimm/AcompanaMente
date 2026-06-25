@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reportaje Especial: Trasplantes y Vida | TDI Noticias</title>
     
-    <!-- Fuentes: DM Sans para títulos y Montserrat para texto normal -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700;800&family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -155,46 +154,55 @@
            SISTEMA HOVER INMERSIVO CON SOMBRA Y PROTAGONISMO
            ======================================================== */
            
-        /* La Sombra Oscura que cubre todo el fondo */
+        /* La Sombra Oscura que cubre todo el fondo de la sección */
         .section-shadow {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(1, 75, 67, 0.92); /* Verde oscuro médico con alta opacidad */
-            backdrop-filter: blur(10px); /* Efecto cristal desenfocado */
-            z-index: 15;
+            background: rgba(1, 75, 67, 0.85); 
+            backdrop-filter: blur(6px); 
+            z-index: 5; 
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.4s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding-bottom: 50px; 
         }
         .section-shadow.active {
             opacity: 1;
-            pointer-events: auto;
         }
 
-        /* La Tarjeta Protagonista que aparece en el centro */
+        /* Contenedor que agrupa Tarjeta y Nodos en orden vertical */
+        .timeline-hover-layout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px; 
+            width: 100%;
+            position: relative;
+            z-index: 10; 
+        }
+
+        /* La Tarjeta Protagonista */
         .cinematic-card {
             background: white;
             border-radius: 20px;
             padding: 40px;
             display: grid;
-            grid-template-columns: 1.2fr 1fr; /* Texto a la izquierda | Foto a la derecha */
+            grid-template-columns: 1.2fr 1fr;
             gap: 40px;
             max-width: 950px;
-            width: 90%;
-            transform: translateY(40px) scale(0.95);
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            width: 100%;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease;
+            min-height: 400px; 
         }
-        .section-shadow.active .cinematic-card {
-            transform: translateY(0) scale(1);
+        
+        .section-shadow.active + .content-wrapper .cinematic-card {
+            transform: scale(1.02);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
         }
 
         .c-text-box { display: flex; flex-direction: column; justify-content: center; }
-        .c-text-box h3 { font-size: 2.2rem; margin-bottom: 15px; }
+        .c-text-box h3 { color: var(--color-green-dark) !important; font-size: 2.2rem; margin-bottom: 15px; }
+        .c-text-box p { color: #4a5568 !important; }
         
         .c-img-box {
             width: 100%;
@@ -205,19 +213,19 @@
         }
         .c-img-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-        /* Los Nodos Inferiores (Donde se pasa el mouse) */
+        /* Los Nodos Inferiores */
         .cinematic-nodes-wrapper {
             position: relative;
-            z-index: 20; /* Mantiene los nodos por encima de la sombra */
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 60px;
+            width: 100%;
+            max-width: 950px;
             padding: 25px 40px;
-            background: rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.1);
             border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.15);
-            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
         }
 
         /* Línea horizontal detrás de los números */
@@ -291,10 +299,10 @@
             header { flex-direction: column; gap: 15px; text-align: center; }
             .slide-container { padding: 50px 4%; }
             h1 { font-size: 2.2rem !important; }
-            .cinematic-card { grid-template-columns: 1fr; padding: 25px; gap: 20px; }
+            .cinematic-card { grid-template-columns: 1fr; padding: 25px; gap: 20px; min-height: auto; }
             .c-img-box { height: 200px; }
             .c-text-box h3 { font-size: 1.6rem; }
-            .cinematic-nodes-wrapper { padding: 15px 20px; margin-top: 30px; }
+            .cinematic-nodes-wrapper { padding: 15px 20px; }
             .c-num { width: 45px; height: 45px; font-size: 1.1rem; }
             .c-label { font-size: 0.85rem; }
         }
@@ -302,8 +310,7 @@
 </head>
 <body>
 
-    <!-- AUDIO DE FONDO (Loop nativo) -->
-    <audio id="bg-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" loop></audio>
+    <audio id="bg-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" autoplay loop></audio>
 
     <button class="music-control" onclick="toggleMusic()">
         <i id="music-icon" class="fa-solid fa-volume-xmark"></i>
@@ -325,7 +332,6 @@
         </nav>
     </header>
     
-    <!-- FONDO 1: #014B43 -->
     <section class="slide-container" data-bg="#014B43">
         <div class="content-wrapper">
             <h1 style="font-size: 3.5rem; text-align: center; margin-bottom: 25px;">Trasplantes en Chile: Segundos que Salvan Vidas</h1>
@@ -336,7 +342,6 @@
         </div>
     </section>
 
-    <!-- FONDO 2: #099078 -->
     <section class="slide-container" data-bg="#099078">
         <div class="content-wrapper">
             <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 10px;">Registro Audiovisual</h2>
@@ -347,7 +352,6 @@
         </div>
     </section>
 
-    <!-- FONDO 3: #014B43 -->
     <section class="slide-container" id="audio-section" data-bg="#014B43">
         <div class="content-wrapper">
             <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 10px;">Testimonios de Esperanza</h2>
@@ -361,55 +365,52 @@
         </div>
     </section>
 
-    <!-- FONDO 4: #099078 - LÍNEA DE TIEMPO HOVER INMERSIVO -->
-    <section class="slide-container" data-bg="#099078" style="overflow: hidden;">
+    <section class="slide-container" id="timeline-section" data-bg="#099078" style="overflow: hidden;">
         
-        <!-- SOMBRA OSCURA Y TARJETA PROTAGONISTA (Z-15) -->
-        <div class="section-shadow" id="section-shadow">
-            <div class="cinematic-card" onmouseenter="keepCinematic()" onmouseleave="hideCinematic()">
-                <div class="c-text-box">
-                    <h3 id="c-title" style="color: var(--color-green-dark) !important;">Título</h3>
-                    <p id="c-desc" style="color: #4a5568 !important;">Desc</p>
-                </div>
-                <div class="c-img-box">
-                    <img id="c-img" src="" alt="Etapa">
-                </div>
-            </div>
-        </div>
+        <div class="section-shadow" id="section-shadow"></div>
 
-        <!-- CONTENIDO BASE DE LA SECCIÓN (Z-2) -->
-        <div class="content-wrapper" style="z-index: 2; text-align: center; margin-bottom: 30px;">
-            <h2 style="font-size: 2.5rem; margin-bottom: 15px;">Trayectoria de Vida: La Historia de Carlos</h2>
-            <p style="opacity: 0.85; max-width: 700px; margin: 0 auto;">Pasa el cursor sobre cada etapa en la línea inferior para revelar los hitos clínicos de la historia.</p>
-        </div>
-
-        <!-- NODOS INTERACTIVOS (Z-20) -->
-        <div class="content-wrapper" style="z-index: 20;">
-            <div class="cinematic-nodes-wrapper" onmouseleave="hideCinematic()">
-                <div class="c-line"></div>
+        <div class="content-wrapper" style="z-index: 10;">
+            <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 15px;">Trayectoria de Vida: La Historia de Carlos</h2>
+            <p style="text-align: center; opacity: 0.85; max-width: 700px; margin: 0 auto 30px;">Pasa el cursor sobre cada etapa en la línea inferior para revelar los hitos clínicos de la historia.</p>
+            
+            <div class="timeline-hover-layout">
                 
-                <div class="c-node" onmouseenter="showCinematic(0)">
-                    <div class="c-num">1</div>
-                    <div class="c-label">Espera</div>
+                <div class="cinematic-card" id="cinematic-card">
+                    <div class="c-text-box">
+                        <h3 id="c-title">1. La Espera Angustiosa</h3>
+                        <p id="c-desc">Carlos, diagnosticado con insuficiencia renal terminal, pasa 3 años conectado a una máquina de diálisis diaria, inscrito en la lista nacional de espera.</p>
+                    </div>
+                    <div class="c-img-box">
+                        <img id="c-img" src="https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=600&q=80" alt="Etapa">
+                    </div>
                 </div>
-                <div class="c-node" onmouseenter="showCinematic(1)">
-                    <div class="c-num">2</div>
-                    <div class="c-label">Alerta</div>
+
+                <div class="cinematic-nodes-wrapper" onmouseleave="hideCinematic()">
+                    <div class="c-line"></div>
+                    
+                    <div class="c-node active" onmouseenter="showCinematic(0)">
+                        <div class="c-num">1</div>
+                        <div class="c-label">Espera</div>
+                    </div>
+                    <div class="c-node" onmouseenter="showCinematic(1)">
+                        <div class="c-num">2</div>
+                        <div class="c-label">Alerta</div>
+                    </div>
+                    <div class="c-node" onmouseenter="showCinematic(2)">
+                        <div class="c-num">3</div>
+                        <div class="c-label">Cirugía</div>
+                    </div>
+                    <div class="c-node" onmouseenter="showCinematic(3)">
+                        <div class="c-num">4</div>
+                        <div class="c-label">Alta Médica</div>
+                    </div>
                 </div>
-                <div class="c-node" onmouseenter="showCinematic(2)">
-                    <div class="c-num">3</div>
-                    <div class="c-label">Cirugía</div>
-                </div>
-                <div class="c-node" onmouseenter="showCinematic(3)">
-                    <div class="c-num">4</div>
-                    <div class="c-label">Alta Médica</div>
-                </div>
+
             </div>
         </div>
 
     </section>
 
-    <!-- FONDO 5: #C01113 -->
     <section class="slide-container" data-bg="#C01113">
         <div class="content-wrapper" style="text-align: center;">
             <h2 style="font-size: 3rem; margin-bottom: 20px;">Una Alerta Crítica</h2>
@@ -417,7 +418,6 @@
         </div>
     </section>
 
-    <!-- FONDO 6: #FDFFFF -->
     <section class="slide-container" data-bg="#FDFFFF">
         <div class="content-wrapper">
             <h2 style="color: #2b2b2b !important; text-align: center; font-size: 2.5rem; margin-bottom: 10px;">El Latido de las Cifras</h2>
@@ -433,7 +433,6 @@
         </div>
     </section>
 
-    <!-- FONDO 7: #666569 -->
     <section class="slide-container" data-bg="#666569">
         <div class="content-wrapper" style="text-align: center;">
             <h2>Compromiso con la Vida</h2>
@@ -443,13 +442,22 @@
     </section>
 
     <script>
-        /* --- MÚSICA AMBIENTAL Y CONTROLES (CÓDIGO ANTERIOR ESTABLE) --- */
+        /* --- MÚSICA AMBIENTAL DIRECTA AL ENTRAR (SIN DETECTORES DE ESPERA) --- */
         const bgMusic = document.getElementById('bg-music');
         const mainAudio = document.getElementById('main-audio');
         const musicIcon = document.getElementById('music-icon');
         bgMusic.volume = 0.15; 
         let musicMuted = true;
 
+        // Ejecutar de forma inmediata al cargar el script en la entrada del usuario
+        bgMusic.play().then(() => {
+            musicMuted = false;
+            musicIcon.className = "fa-solid fa-volume-high";
+        }).catch(() => {
+            console.log("Autoplay nativo bloqueado por restricciones de seguridad del navegador.");
+        });
+
+        // Botón Manual
         function toggleMusic() {
             if (bgMusic.paused) {
                 bgMusic.play(); musicIcon.className = "fa-solid fa-volume-high"; musicMuted = false;
@@ -458,39 +466,19 @@
             }
         }
 
-        // Se activa con el primer scroll
-        window.addEventListener('scroll', () => {
-            if (musicMuted && bgMusic.paused) {
-                bgMusic.play().then(() => {
-                    musicMuted = false;
-                    musicIcon.className = "fa-solid fa-volume-high";
-                }).catch(() => { console.log("Interacción requerida para el audio"); });
-            }
-        }, { once: true });
-
-        // O con el primer clic
-        document.addEventListener('click', () => {
-            if (musicMuted && bgMusic.paused) {
-                bgMusic.play().then(() => {
-                    musicMuted = false;
-                    musicIcon.className = "fa-solid fa-volume-high";
-                }).catch(() => {});
-            }
-        }, { once: true });
-
-        // Lógica de interrupción para el testimonio
+        // Lógica de interrupción para la sección de testimonios
         const audioSection = document.getElementById('audio-section');
         const audioObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    bgMusic.pause(); 
+                    if (!bgMusic.paused) bgMusic.pause(); 
                     mainAudio.play().catch(() => {});
                 } else {
-                    mainAudio.pause(); 
-                    if (!musicMuted) bgMusic.play(); 
+                    if (!mainAudio.paused) mainAudio.pause(); 
+                    if (!musicMuted && bgMusic.paused) bgMusic.play(); 
                 }
             });
-        }, { threshold: 0.4 });
+        }, { threshold: 0.5 });
         audioObserver.observe(audioSection);
 
         /* --- MANEJO DE FONDOS Y PARALLAX --- */
@@ -510,25 +498,25 @@
         
         const stageData = [
             { 
-                title: "Etapa 1: La Espera Angustiosa", 
+                title: "1. La Espera Angustiosa", 
                 desc: "Carlos, diagnosticado con insuficiencia renal terminal, pasa 3 años conectado a una máquina de diálisis diaria, inscrito en la lista nacional de espera.", 
                 img: "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=600&q=80", 
                 color: "#29869C" 
             },
             { 
-                title: "Etapa 2: El Llamado de Emergencia", 
+                title: "2. El Llamado de Emergencia", 
                 desc: "3:14 AM. Suena la alerta. Una compatibilidad exacta ha aparecido y la red logística debe trasladar el órgano vital de inmediato antes de perder viabilidad.", 
                 img: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=600&q=80", 
                 color: "#C01113" 
             },
             { 
-                title: "Etapa 3: La Operación Crítica", 
+                title: "3. La Operación Crítica", 
                 desc: "8 horas de intervención precisa en pabellón estéril. El equipo de cirujanos vasculares conecta el injerto en una carrera directa contra el reloj.", 
                 img: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=600&q=80", 
                 color: "#014B43" 
             },
             { 
-                title: "Etapa 4: Un Nuevo Latido", 
+                title: "4. Un Nuevo Latido", 
                 desc: "Tras 6 meses de alta médica, los exámenes descartan rechazos inmunológicos. Carlos vuelve a caminar de forma independiente y recupera su proyecto de vida.", 
                 img: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=600&q=80", 
                 color: "#099078" 
@@ -540,7 +528,6 @@
             const data = stageData[idx];
             
             document.getElementById('c-title').innerText = data.title;
-            document.getElementById('c-title').style.color = data.color;
             document.getElementById('c-desc').innerText = data.desc;
             document.getElementById('c-img').src = data.img;
             
@@ -554,12 +541,16 @@
         function hideCinematic() {
             cinematicTimer = setTimeout(() => {
                 document.getElementById('section-shadow').classList.remove('active');
-                document.querySelectorAll('.c-node').forEach(node => node.classList.remove('active'));
-            }, 100);
-        }
-
-        function keepCinematic() {
-            clearTimeout(cinematicTimer);
+                
+                document.querySelectorAll('.c-node').forEach((node, i) => {
+                    i === 0 ? node.classList.add('active') : node.classList.remove('active');
+                });
+                
+                const data = stageData[0];
+                document.getElementById('c-title').innerText = data.title;
+                document.getElementById('c-desc').innerText = data.desc;
+                document.getElementById('c-img').src = data.img;
+            }, 250); 
         }
 
         /* --- CHART.JS --- */
